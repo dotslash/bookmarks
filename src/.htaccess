@@ -1,0 +1,10 @@
+Options +FollowSymLinks
+RewriteEngine On
+
+RewriteCond %{SCRIPT_FILENAME} !-d
+RewriteCond %{SCRIPT_FILENAME} !-f
+
+
+RewriteRule ^red/(.*)$ ./serve.php?short=$1
+RewriteRule ^actions/(.*)$ ./actions.php?action=$1
+RewriteRule ^test/(.*)$ ./test.php?inp=$1
