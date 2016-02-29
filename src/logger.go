@@ -30,8 +30,8 @@ func newLogger() *log.Logger {
     home := usr.HomeDir
     lLog := log.New()
     lLog.Hooks.Add(lfshook.NewHook(lfshook.PathMap{
-        log.InfoLevel : home + "/log/info.log",
-        log.ErrorLevel : home + "/log/error.log",
+        log.InfoLevel : home + "/log/bm-info.log",
+        log.ErrorLevel : home + "/log/bm-error.log",
     }))
     return lLog
 }
