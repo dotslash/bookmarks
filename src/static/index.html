@@ -1,0 +1,123 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+
+<!--
+/*
+ * examples/mysql/index.html
+ *
+ * This file is part of EditableGrid.
+ * http://editablegrid.net
+ *
+ * Copyright (c) 2011 Webismymind SPRL
+ * Dual licensed under the MIT or GPL Version 2 licenses.
+ * http://editablegrid.net/license
+ */
+-->
+
+<html>
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Bookmarks - Sai Teja Pratap</title>
+    <link rel="stylesheet" href="css/style-list.css" type="text/css"
+          media="screen">
+    <link rel="stylesheet" href="css/responsive.css" type="text/css"
+          media="screen">
+    <link rel="stylesheet" href="css/jquery-ui.css"/>
+    <link rel="stylesheet"
+          href="css/font-awesome-4.1.0/css/font-awesome.min.css" type="text/css"
+          media="screen">
+</head>
+
+<body>
+<div id="wrap">
+    <h1>List of bookmarked urls</h1>
+
+    <!-- Feedback message zone -->
+    <div id="message"></div>
+
+    <div id="toolbar">
+        <input type="text" id="filter" name="filter"
+               placeholder="Filter :type any text here"/> <a
+            id="showaddformbutton" class="button">Add new row</a> <a
+            id="showsecretbutton" class="button">Enter secret</a>
+    </div>
+    <!-- Grid contents -->
+    <div id="tablecontent"></div>
+
+    <!-- Paginator control -->
+    <div id="paginator"></div>
+</div>
+
+<script src="js/editablegrid-2.1.0-b13.js" type="text/javascript"></script>
+<script src="js/jquery-1.11.1.min.js" type="text/javascript"></script>
+<!-- EditableGrid test if jQuery UI is present. If present, a datepicker is automatically used for date type -->
+<script
+        src="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.4/jquery-ui.min.js"
+        type="text/javascript"></script>
+<script src="js/connector.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+        var datagrid = new DatabaseGrid();
+        window.onload = function() {
+
+            // key typed in the filter field
+            $("#filter").keyup(function() {
+                datagrid.editableGrid.filter($(this).val());
+
+                // To filter on some columns, you can set an array of column index
+                //datagrid.editableGrid.filter( $(this).val(), [0,3,5]);
+            });
+
+            $("#showaddformbutton").click(function() {
+                showAddForm();
+            });
+            $("#cancelbutton").click(function() {
+                showAddForm();
+            });
+
+            $("#addbutton").click(function() {
+                datagrid.addRow();
+            });
+
+            $("#showsecretbutton").click(function() {
+                showSecret();
+            });
+            $("#addbutton1").click(function() {
+                showSecret();
+            });
+
+        };
+
+</script>
+
+<!-- simple form, used to add a new row -->
+<div id="addform">
+
+    <div class="row">
+        <input type="text" id="short" name="short" placeholder="short"/>
+    </div>
+
+    <div class="row">
+        <input type="text" id="long" name="long" placeholder="url"/>
+    </div>
+
+
+    <div class="row tright">
+        <a id="addbutton" class="button">Apply</a> <a id="cancelbutton"
+                                                      class="button">Cancel</a>
+    </div>
+</div>
+
+<div id="inpSecret">
+    <div class="row">
+        <input type="text" id="secret" name="secret" placeholder="secret"/>
+    </div>
+
+    <div class="row tright">
+        <a id="addbutton1" class="button">Done</a>
+    </div>
+</div>
+
+</body>
+
+</html>

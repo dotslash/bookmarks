@@ -19,6 +19,10 @@ function highlight(div_id, style) {
    updateCellValue calls the PHP script that will update the database.
  */
 function updateCellValue(editableGrid, rowIndex, columnIndex, oldValue, newValue, row, onResponse) {
+    console.log(oldValue);
+    console.log(newValue);
+    console.log(editableGrid.getColumnName(columnIndex));
+    console.log(editableGrid.getColumnType(columnIndex));
     $.ajax({
         url: 'actions/update',
         type: 'POST',
@@ -27,6 +31,7 @@ function updateCellValue(editableGrid, rowIndex, columnIndex, oldValue, newValue
             tablename: editableGrid.name,
             id: editableGrid.getRowId(rowIndex),
             newvalue: editableGrid.getColumnType(columnIndex) == "boolean" ? (newValue ? 1 : 0) : newValue,
+            oldvalue: oldValue,
             colname: editableGrid.getColumnName(columnIndex),
             coltype: editableGrid.getColumnType(columnIndex),
             secret : $('#secret').val()
@@ -78,8 +83,10 @@ DatabaseGrid.prototype.initializeGrid = function(grid) {
 
     // render for the action column
     grid.setCellRenderer("action", new CellRenderer({
-        render: function(cell, id) {
-            cell.innerHTML += "<i onclick=\"datagrid.deleteRow(" + id + ");\" class='fa fa-trash-o' ></i>";
+        render: function(cell, _id) {
+            var rowId = grid.getRowId(cell.rowIndex).trim();
+            console.log(rowId)
+            cell.innerHTML += "<i onclick=\"datagrid.deleteRow('" + rowId + "');\" class='fa fa-trash-o' ></i>";
         }
     }));
 
@@ -91,6 +98,7 @@ DatabaseGrid.prototype.deleteRow = function(id) {
 
     var self = this;
     var check = confirm('Sure?');
+    console.log(id);
     if (check) {
 
         $.ajax({
