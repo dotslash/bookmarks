@@ -5,6 +5,7 @@ import (
     "os"
     "strconv"
     "fmt"
+    "strings"
 )
 var db = getDbCxn()
 var actual_secret = *getSecret()
@@ -91,7 +92,8 @@ func addUrlAndAlias(alias string, orig string, overwrite bool) bool {
     return true
 }
 
-func getAllAliases() aliasInfos {
+func getAllAliases(secret string) aliasInfos {
+    show_hidden := secret == actual_secret
     stmt, err := db.Prepare("select orig, alias, rec_id from aliases"); if err != nil {
         Log.Fatal(err)
     }
@@ -107,6 +109,9 @@ func getAllAliases() aliasInfos {
         var alias string
         var rec_id int
         rows.Scan(&orig, &alias, &rec_id)
+        if strings.HasPrefix(alias, "_") && !show_hidden {
+            continue
+        }
         str_id := strconv.Itoa(rec_id)
         ret = append(ret, AliasInfo{Alias:alias, Orig:orig, id:str_id})
     }
@@ -158,6 +163,9 @@ func delAlias(alias string, secret string) string {
     return "ok"
 }
 func updateAlias(presAlias, oldVal, newVal, colname, secret string) string {
+    if secret != actual_secret {
+        return "secret did not match"
+    }
     query := `
 		update aliases
 		set %s = ?

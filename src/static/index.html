@@ -37,9 +37,10 @@
 
     <div id="toolbar">
         <input type="text" id="filter" name="filter"
-               placeholder="Filter :type any text here"/> <a
-            id="showaddformbutton" class="button">Add new row</a> <a
-            id="showsecretbutton" class="button">Enter secret</a>
+               placeholder="Filter :type any text here"/>
+        <a id="showaddformbutton" class="button">Add new row</a>
+        <a id="showsecretbutton" class="button">Enter secret</a>
+        <a id="refresh" class="button">Refresh Data</a>
     </div>
     <!-- Grid contents -->
     <div id="tablecontent"></div>
@@ -84,6 +85,9 @@
             });
             $("#addbutton1").click(function() {
                 showSecret();
+            });
+            $("#refresh").click(function() {
+                datagrid.refresh();
             });
 
         };

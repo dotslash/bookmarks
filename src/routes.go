@@ -20,7 +20,7 @@ var routes = Routes{
     },
     Route{
         "ActionView",
-        []string{"GET"},
+        []string{"GET", "POST"},
         "/actions/view",
         ActionView,
     },

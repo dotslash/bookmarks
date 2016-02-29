@@ -160,6 +160,25 @@ DatabaseGrid.prototype.addRow = function(id) {
     });
 };
 
+DatabaseGrid.prototype.refresh = function() {
+    var self = this;
+    $.ajax({
+        url: 'actions/view',
+        type: 'POST',
+        dataType: "html",
+        data: {
+            secret : $('#secret').val()
+        },
+        success: function(response) {
+            self.editableGrid.loadJSONFromString(response);
+            self.editableGrid.tableLoaded();
+        },
+        error: function(XMLHttpRequest, textStatus, exception) {
+            alert("Ajax failure\n" + errortext);
+        },
+        async: true
+    });
+}
 
 function updatePaginator(grid, divId) {
     divId = divId || "paginator";

@@ -12,7 +12,8 @@ import (
 func ActionView(w http.ResponseWriter, r *http.Request) {
     w.Header().Set("Content-Type", "application/json; charset=UTF-8")
     w.WriteHeader(http.StatusOK)
-    aliasinfos := getAllAliases()
+    secret := r.FormValue("secret")
+    aliasinfos := getAllAliases(secret)
     resp := makeResponse(aliasinfos, server_prefix)
     if err := json.NewEncoder(w).Encode(resp); err != nil {
         Log.Fatal(err)
