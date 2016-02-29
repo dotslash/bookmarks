@@ -10,6 +10,7 @@ var db = getDbCxn()
 var actual_secret = *getSecret()
 
 func getDbCxn() *sql.DB {
+    Log.Info("starting DB cxn")
     dir, err := os.Getwd(); if err != nil {
         Log.Error(err)
     }
@@ -19,6 +20,7 @@ func getDbCxn() *sql.DB {
     if err != nil {
         Log.Fatal(err)
     }
+    Log.Info("got DB cxn")
     return db
 }
 

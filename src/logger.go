@@ -6,6 +6,7 @@ import (
     log "github.com/Sirupsen/logrus"
     "github.com/rifflock/lfshook"
     "os/user"
+    "fmt"
 )
 var Log *log.Logger = newLogger()
 
@@ -26,6 +27,8 @@ func Logger(inner http.Handler, name string) http.Handler {
 
 
 func newLogger() *log.Logger {
+    fmt.Println("getting logger")
+    start := time.Now()
     usr, _ := user.Current()
     home := usr.HomeDir
     lLog := log.New()
@@ -33,5 +36,6 @@ func newLogger() *log.Logger {
         log.InfoLevel : home + "/log/bm-info.log",
         log.ErrorLevel : home + "/log/bm-error.log",
     }))
+    lLog.Info("got logger in", time.Since(start))
     return lLog
 }
