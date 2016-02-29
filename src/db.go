@@ -1,7 +1,6 @@
 package main
 import (
     "database/sql"
-    "log"
     _ "github.com/mattn/go-sqlite3"
     "os"
     "strconv"
@@ -12,32 +11,32 @@ var actual_secret = *getSecret()
 
 func getDbCxn() *sql.DB {
     dir, err := os.Getwd(); if err != nil {
-        log.Fatal(err)
+        Log.Error(err)
     }
     var dbpath = dir + "/foo.db"
-    log.Println("dbpath %s", dbpath)
+    Log.Println("dbpath %s", dbpath)
     db, err := sql.Open("sqlite3", dbpath)
     if err != nil {
-        log.Fatal(err)
+        Log.Fatal(err)
     }
     return db
 }
 
 func getSecret() *string {
     stmt, err := db.Prepare("select value from config where key = 'bm_secret'"); if err != nil {
-        log.Fatal(err)
+        Log.Fatal(err)
     }
     defer stmt.Close()
 
     rows, err := stmt.Query(); if err != nil {
-        log.Fatal(err)
+        Log.Fatal(err)
     }
     defer rows.Close()
 
     for rows.Next() {
         var orig string
         rows.Scan(&orig)
-        log.Println(orig)
+        Log.Println(orig)
         return &orig
     }
     return nil
@@ -45,19 +44,19 @@ func getSecret() *string {
 
 func urlFromAlias(alias string) *string {
     stmt, err := db.Prepare("select orig from aliases where alias = ?"); if err != nil {
-        log.Fatal(err)
+        Log.Fatal(err)
     }
     defer stmt.Close()
 
     rows, err := stmt.Query(alias); if err != nil {
-        log.Fatal(err)
+        Log.Fatal(err)
     }
     defer rows.Close()
 
     for rows.Next() {
         var orig string
         rows.Scan(&orig)
-        log.Println(orig)
+        Log.Println(orig)
         return &orig
     }
     return nil
@@ -66,23 +65,23 @@ func urlFromAlias(alias string) *string {
 func addUrlAndAlias(alias string, orig string, overwrite bool) bool {
     prev_val := urlFromAlias(alias)
     if !overwrite && prev_val != nil {
-        log.Println("returning because alias is already there")
+        Log.Println("returning because alias is already there")
         return false
     }
     tx, err := db.Begin(); if err != nil {
-        log.Fatal(err)
+        Log.Fatal(err)
         return false
     }
     query := "insert or replace into aliases(alias,orig) values(?,?)"
     stmt, err := tx.Prepare(query); if err != nil {
-        log.Fatal(err)
+        Log.Fatal(err)
         return false
     }
     defer stmt.Close()
 
     // We dont care about the result!
     _, err = stmt.Exec(alias, orig); if err != nil {
-        log.Fatal(err)
+        Log.Fatal(err)
         tx.Rollback()
         return false
     }
@@ -92,12 +91,12 @@ func addUrlAndAlias(alias string, orig string, overwrite bool) bool {
 
 func getAllAliases() aliasInfos {
     stmt, err := db.Prepare("select orig, alias, rec_id from aliases"); if err != nil {
-        log.Fatal(err)
+        Log.Fatal(err)
     }
     defer stmt.Close()
 
     rows, err := stmt.Query(); if err != nil {
-        log.Fatal(err)
+        Log.Fatal(err)
     }
     defer rows.Close()
     var ret aliasInfos;
@@ -116,16 +115,16 @@ func getAllAliases() aliasInfos {
 
 func delByAlias(alias string) bool {
     tx, err := db.Begin(); if err != nil {
-        log.Fatal(err)
+        Log.Fatal(err)
         return false
     }
     stmt, err := tx.Prepare("delete from aliases where alias = ?"); if err != nil {
-        log.Fatal(err)
+        Log.Fatal(err)
         return false
     }
     defer stmt.Close()
     _, err = stmt.Exec(alias); if err != nil {
-        log.Fatal(err)
+        Log.Fatal(err)
         tx.Rollback()
         return false
     }
@@ -163,18 +162,18 @@ func updateAlias(presAlias, oldVal, newVal, colname, secret string) string {
 		where alias = ? and %s = ?`
     if colname != "alias" {colname = "orig"}
     query = fmt.Sprintf(query, colname, colname)
-    // log.Println(query)
+    // Log.Println(query)
     tx, err := db.Begin(); if err != nil {
-        log.Fatal(err)
+        Log.Fatal(err)
         return "Fail"
     }
     stmt, err := tx.Prepare(query); if err != nil {
-        log.Fatal(err)
+        Log.Fatal(err)
         return "Fail"
     }
     defer stmt.Close()
     _, err = stmt.Exec(newVal, presAlias, oldVal); if err != nil {
-        log.Fatal(err)
+        Log.Fatal(err)
         tx.Rollback()
         return "Fail"
     }
@@ -182,12 +181,12 @@ func updateAlias(presAlias, oldVal, newVal, colname, secret string) string {
     return "ok"
 }
 //func main() {
-//	log.Println(addUrlAndAlias("abs", "abs.com", false))
+//	Log.Println(addUrlAndAlias("abs", "abs.com", false))
 //	x := urlFromAlias("abs")
-//	log.Println("url %s", *x)
-//	log.Println(*x)
-//	log.Println(addUrlAndAlias("abs", "abs.com", false))
-//	log.Println(addUrlAndAlias("abs", *x + "1", true))
-//	log.Println(secret)
-//	log.Println(getAllAliases())
+//	Log.Println("url %s", *x)
+//	Log.Println(*x)
+//	Log.Println(addUrlAndAlias("abs", "abs.com", false))
+//	Log.Println(addUrlAndAlias("abs", *x + "1", true))
+//	Log.Println(secret)
+//	Log.Println(getAllAliases())
 //}

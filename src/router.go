@@ -3,7 +3,6 @@ package main
 import (
     "net/http"
     "github.com/gorilla/mux"
-    "log"
 )
 
 func NewRouter() *mux.Router {
@@ -11,7 +10,7 @@ func NewRouter() *mux.Router {
     router := mux.NewRouter()
     for _, route := range routes {
         var handler http.Handler
-        log.Println(route)
+        Log.Println(route)
         handler = route.HandlerFunc
         handler = Logger(handler, route.Name)
         router.Methods(route.Methods...).

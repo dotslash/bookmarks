@@ -4,7 +4,6 @@ import (
     "encoding/json"
     "net/http"
     "github.com/gorilla/mux"
-    "log"
     "strings"
     "fmt"
 )
@@ -16,7 +15,7 @@ func ActionView(w http.ResponseWriter, r *http.Request) {
     aliasinfos := getAllAliases()
     resp := makeResponse(aliasinfos, server_prefix)
     if err := json.NewEncoder(w).Encode(resp); err != nil {
-        log.Fatal(err)
+        Log.Fatal(err)
     }
 }
 
@@ -24,7 +23,7 @@ func ActionAdd(w http.ResponseWriter, r *http.Request) {
     short := r.FormValue("short")
     long := r.FormValue("url")
     secret := r.FormValue("secret")
-    log.Println(short, long, secret)
+    Log.Println(short, long, secret)
     respStr := addAlias(long, short, secret)
     fmt.Fprint(w, respStr)
 }
@@ -32,7 +31,7 @@ func ActionAdd(w http.ResponseWriter, r *http.Request) {
 func ActionDel(w http.ResponseWriter, r *http.Request) {
     short := r.FormValue("id")
     secret := r.FormValue("secret")
-    log.Println("formparams", short, secret)
+    Log.Println("formparams", short, secret)
     respStr := delAlias(short, secret)
     fmt.Fprint(w, respStr)
 }
@@ -43,7 +42,7 @@ func ActionUpdate(w http.ResponseWriter, r *http.Request) {
     oldVal := r.FormValue("oldvalue")
     colname := r.FormValue("colname")
     secret := r.FormValue("secret")
-    log.Println("formparams:(presAlias, new, old, field)", presAlias, newVal, oldVal, colname)
+    Log.Println("formparams:(presAlias, new, old, field)", presAlias, newVal, oldVal, colname)
     respStr := updateAlias(presAlias, oldVal, newVal, colname, secret)
     fmt.Fprint(w, respStr)
 }
