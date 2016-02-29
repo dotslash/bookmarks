@@ -28,3 +28,5 @@ TODO
 - Tidy up the logs. (The present log is mix-mash of native log library and logrus)
 - The startup time is very slow on ec2 (my tiny t2.micro). Investigate why.
 - Need to somehow move to [bm.yesteapea.com](http://bm.yesteapea.com) from [bm.yesteapea.com:8085](http://bm.yesteapea.com:8085). Its just too ugly!
+
+**Credits** : This is my first task/mini-project on Go and the code is heavily borrowed from [thenewstack.io/make-a-restful-json-api-go](http://thenewstack.io/make-a-restful-json-api-go/)
