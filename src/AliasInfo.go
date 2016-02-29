@@ -1,6 +1,5 @@
 package main
 import (
-    "log"
     "strings"
 )
 
@@ -14,7 +13,7 @@ func makeResponse(aliases []AliasInfo, serverPrefix string) response {
     for _, info := range aliases {
         rows = append(rows, info.toRow(serverPrefix))
     }
-    log.Println(rows)
+    // log.Println(rows)
     return response{Data:rows, Metadata:md}
 }
 

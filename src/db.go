@@ -163,7 +163,7 @@ func updateAlias(presAlias, oldVal, newVal, colname, secret string) string {
 		where alias = ? and %s = ?`
     if colname != "alias" {colname = "orig"}
     query = fmt.Sprintf(query, colname, colname)
-    log.Println(query)
+    // log.Println(query)
     tx, err := db.Begin(); if err != nil {
         log.Fatal(err)
         return "Fail"
