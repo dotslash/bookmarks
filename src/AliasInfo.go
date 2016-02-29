@@ -1,10 +1,15 @@
 package main
 import (
 	"log"
+	"strings"
 )
 
 
 func makeResponse(aliases []AliasInfo, serverPrefix string) response {
+	if (!strings.HasSuffix(serverPrefix, "/")) {
+		serverPrefix = serverPrefix + "/"
+	}
+	serverPrefix = serverPrefix + "red/"
 	var rows []row
 	for _, info := range aliases {
 		rows = append(rows, info.toRow(serverPrefix))

@@ -14,7 +14,7 @@ func ActionView(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.WriteHeader(http.StatusOK)
 	aliasinfos := getAllAliases()
-	resp := makeResponse(aliasinfos, "http://localhost:8085/red/")
+	resp := makeResponse(aliasinfos, server_prefix)
 	if err := json.NewEncoder(w).Encode(resp); err != nil {
 		log.Fatal(err)
 	}
