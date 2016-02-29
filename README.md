@@ -1,7 +1,7 @@
 bookmarks
 =========
 
-The code for [bm.yesteapea.com](http://bm.yesteapea.com). I use the site to bookmark websites with custom redirect URLs. The website is written completely in Go (earlier ~~PHP~~). What makes this more usable to me is this library called [editable grid](https://github.com/webismymind/editablegrid).
+The code for [bm.yesteapea.com:8085](http://bm.yesteapea.com) .I use the site to bookmark websites with custom redirect URLs. The website is written completely in Go (earlier ~~PHP~~). What makes this more usable to me is this library called [editable grid](https://github.com/webismymind/editablegrid).
 
 I use sqlite (the poor man's DB!) to persist data. The code expects 'foo.db' (yes,Im lazy) in the 'src' directory. Find the db schema below
 ```
@@ -20,5 +20,11 @@ CREATE TABLE `config` (
 *Note* : Even though the website is publicly accessible, content can be modified only be me (One has to enter the secret key to edit content).
 
 
-To start the server run `go run src/*.go http://localhost:8085`
+To start the server run `go run src/*.go http://localhost:8085`  
+The logs would go to `~/log/bm-info.log`, `~/log/bm-error.log`
 
+TODO
+===
+- Tidy up the logs. (The present log is mix-mash of native log library and logrus)
+- The startup time is very slow on ec2 (my tiny t2.micro). Investigate why.
+- Need to somehow move to [bm.yesteapea.com](http://bm.yesteapea.com) from [bm.yesteapea.com:8085](http://bm.yesteapea.com:8085). Its just too ugly!
