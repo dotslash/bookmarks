@@ -23,9 +23,5 @@ CREATE TABLE `config` (
 To start the server run `go run src/*.go http://localhost:8085`  
 The logs would go to `~/log/bm-info.log`, `~/log/bm-error.log`
 
-TODO
-===
-- Tidy up the logs. (The present log is mix-mash of native log library and logrus)
-- The startup time is very slow on ec2 (my tiny t2.micro). Investigate why.
 
 **Credits** : This is my first task/mini-project on Go and the code is heavily borrowed from [thenewstack.io/make-a-restful-json-api-go](http://thenewstack.io/make-a-restful-json-api-go/)
