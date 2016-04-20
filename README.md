@@ -20,7 +20,7 @@ CREATE TABLE `config` (
 *Note* : Even though the website is publicly accessible, content can be modified only be me (One has to enter the secret key to edit content). There is one more useful functionality which will hide any bookmark with alias that starts with `_` unless the secret is typed.
 
 
-To start the server run `go run src/*.go http://localhost:8085`  
+To start the server run `go run src/*.go http://localhost:8085 8085`  
 The logs would go to `~/log/bm-info.log`, `~/log/bm-error.log`
 
 
