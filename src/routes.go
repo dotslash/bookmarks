@@ -19,6 +19,12 @@ var routes = Routes{
 		Redirect,
 	},
 	Route{
+		"Redirect",
+		[]string{"GET"},
+		"/r/{redId}",
+		Redirect,
+	},
+	Route{
 		"ActionView",
 		[]string{"GET", "POST"},
 		"/actions/view",

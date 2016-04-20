@@ -8,7 +8,7 @@ func makeResponse(aliases []AliasInfo, serverPrefix string) response {
 	if !strings.HasSuffix(serverPrefix, "/") {
 		serverPrefix = serverPrefix + "/"
 	}
-	serverPrefix = serverPrefix + "red/"
+	serverPrefix = serverPrefix + "r/"
 	var rows []row
 	for _, info := range aliases {
 		rows = append(rows, info.toRow(serverPrefix))
