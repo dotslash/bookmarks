@@ -1,0 +1,66 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Bookmarks by dotslash</title>
+
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/github-light.css">
+    <meta name="viewport" content="width=device-width">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1>Bookmarks</h1>
+        <p>Source code for https://yesteapea.com/bm where I store my bookmarks with custom redirect urls</p>
+
+        <p class="view"><a href="https://github.com/dotslash/bookmarks">View the Project on GitHub <small>dotslash/bookmarks</small></a></p>
+
+
+        <ul>
+          <li><a href="https://github.com/dotslash/bookmarks/zipball/master">Download <strong>ZIP File</strong></a></li>
+          <li><a href="https://github.com/dotslash/bookmarks/tarball/master">Download <strong>TAR Ball</strong></a></li>
+          <li><a href="https://github.com/dotslash/bookmarks">View On <strong>GitHub</strong></a></li>
+        </ul>
+      </header>
+      <section>
+        <h1>
+<a id="bookmarks" class="anchor" href="#bookmarks" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>bookmarks</h1>
+
+<p>The code for <a href="http://yesteapea.com/bm">yesteapea.com/bm</a> .I use the site to bookmark websites with custom redirect URLs. The website is written completely in Go (earlier <del>PHP</del>). What makes this more usable to me is this library called <a href="https://github.com/webismymind/editablegrid">editable grid</a>.</p>
+
+<p>I use sqlite (the poor man's DB!) to persist data. The code expects 'foo.db' (yes,Im lazy) in the 'src' directory. Find the db schema below</p>
+
+<pre><code>CREATE TABLE "aliases" (
+    `orig`   TEXT UNIQUE,
+    `alias`  TEXT UNIQUE,
+    `rec_id` INTEGER PRIMARY KEY AUTOINCREMENT
+)
+CREATE TABLE `config` (
+    `key`   TEXT,
+    `value` TEXT,
+    PRIMARY KEY(key)
+)
+# In config table there needs to be a record with key='bm_secret' and value='{YOUR_SECRET_KEY}' 
+</code></pre>
+
+<p><em>Note</em> : Even though the website is publicly accessible, content can be modified only be me (One has to enter the secret key to edit content). There is one more useful functionality which will hide any bookmark with alias that starts with <code>_</code> unless the secret is typed.</p>
+
+<p>To start the server run <code>go run src/*.go http://localhost:8085 8085</code><br>
+The logs would go to <code>~/log/bm-info.log</code>, <code>~/log/bm-error.log</code></p>
+
+<p><strong>Credits</strong> : This is my first task/mini-project on Go and the code is heavily borrowed from <a href="http://thenewstack.io/make-a-restful-json-api-go/">thenewstack.io/make-a-restful-json-api-go</a></p>
+      </section>
+      <footer>
+        <p>This project is maintained by <a href="https://github.com/dotslash">dotslash</a></p>
+        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
+      </footer>
+    </div>
+    <script src="javascripts/scale.fix.js"></script>
+    
+  </body>
+</html>
