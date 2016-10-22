@@ -1,11 +1,7 @@
 function setShortAlias(tabs) {
     var short = $("#short_id").val();
     var secret = $("#secret").val();
-    console.log(short);
-    console.log(secret);
-    console.log(tabs);
     var url = tabs[0].url;
-    console.log(url);
     $.ajax({
         url: 'https://yesteapea.com/bm/actions/add',
         type: 'POST',
