@@ -1,15 +1,18 @@
 bookmarks
 =========
 
-The code for [yesteapea.com/bm](http://yesteapea.com/bm) .I use the site to bookmark websites with custom redirect URLs. The website is written completely in Go (earlier ~~PHP~~). What makes this more usable to me is this library called [editable grid](https://github.com/webismymind/editablegrid).
+The code for [yesteapea.com/bm](http://yesteapea.com/bm). I use the site to bookmark websites with custom redirect URLs.  The website is written completely in Go (earlier ~~PHP~~). 
+What makes this more usable to me is this library called [editable grid](https://github.com/webismymind/editablegrid).
 
-I use sqlite (the poor man's DB!) to persist data. The code expects 'foo.db' (yes,Im lazy) in the 'src' directory. Find the db schema below
+I use sqlite (the poor man's DB!) to persist data. The code expects `foo.db` (yes,Im lazy) in the `src` directory. Find the db schema below
 ```
 CREATE TABLE "aliases" (
-	`orig`	 TEXT UNIQUE,
-	`alias`	 TEXT UNIQUE,
-	`rec_id` INTEGER PRIMARY KEY AUTOINCREMENT
-)
+    `orig` TEXT,
+    `alias`TEXT UNIQUE,
+    `rec_id`       INTEGER PRIMARY KEY AUTOINCREMENT
+);
+CREATE INDEX aliases_orig_index ON "aliases" (orig);
+
 CREATE TABLE `config` (
 	`key`	TEXT,
 	`value`	TEXT,
