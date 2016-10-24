@@ -13,8 +13,33 @@ func ActionView(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.WriteHeader(http.StatusOK)
 	secret := r.FormValue("secret")
-	aliasinfos := getAllAliases(secret)
-	resp := makeResponse(aliasinfos, server_prefix)
+	aliasInfos := getAllAliases(secret)
+	resp := makeViewResponse(aliasInfos, server_prefix)
+	if err := json.NewEncoder(w).Encode(resp); err != nil {
+		Log.Fatal(err)
+	}
+}
+
+func ActionLookup(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	w.WriteHeader(http.StatusOK)
+	short := r.FormValue("short")
+	fullUrl := urlFromAlias(short)
+	if fullUrl == nil {
+		w.WriteHeader(http.StatusNotFound)
+		fmt.Fprint(w, "Not Found")
+		return
+	}
+	fmt.Fprint(w, *fullUrl)
+}
+
+func ActionRevLookup(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	w.WriteHeader(http.StatusOK)
+	secret := r.FormValue("secret")
+	long := r.FormValue("long")
+	shortUrls := getShortUrls(secret, long)
+	resp := makeRevLookUpResponse(shortUrls)
 	if err := json.NewEncoder(w).Encode(resp); err != nil {
 		Log.Fatal(err)
 	}
@@ -41,10 +66,10 @@ func ActionUpdate(w http.ResponseWriter, r *http.Request) {
 	presAlias := r.FormValue("id")
 	newVal := r.FormValue("newvalue")
 	oldVal := r.FormValue("oldvalue")
-	colname := r.FormValue("colname")
+	colName := r.FormValue("colname")
 	secret := r.FormValue("secret")
-	Log.Println("formparams:(presAlias, new, old, field)", presAlias, newVal, oldVal, colname)
-	respStr := updateAlias(presAlias, oldVal, newVal, colname, secret)
+	Log.Println("formparams:(presAlias, new, old, field)", presAlias, newVal, oldVal, colName)
+	respStr := updateAlias(presAlias, oldVal, newVal, colName, secret)
 	fmt.Fprint(w, respStr)
 }
 

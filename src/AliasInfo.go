@@ -4,7 +4,7 @@ import (
 	"strings"
 )
 
-func makeResponse(aliases []AliasInfo, serverPrefix string) response {
+func makeViewResponse(aliases []AliasInfo, serverPrefix string) viewResponse {
 	if !strings.HasSuffix(serverPrefix, "/") {
 		serverPrefix = serverPrefix + "/"
 	}
@@ -14,7 +14,11 @@ func makeResponse(aliases []AliasInfo, serverPrefix string) response {
 		rows = append(rows, info.toRow(serverPrefix))
 	}
 	// log.Println(rows)
-	return response{Data: rows, Metadata: md}
+	return viewResponse{Data: rows, Metadata: md}
+}
+
+func makeRevLookUpResponse(shortUrls []string) revLookupResponse {
+	return revLookupResponse{ShortUrls:shortUrls}
 }
 
 type AliasInfo struct {
@@ -51,18 +55,22 @@ type row struct {
 	Values rowInfo `json:"values"`
 }
 
-type response struct {
+type viewResponse struct {
 	Data     []row     `json:"data"`
 	Metadata []colInfo `json:"metadata"`
+}
+
+type revLookupResponse struct {
+	ShortUrls []string `json:"shorturls"`
 }
 
 type aliasInfos []AliasInfo
 
 var md = []colInfo{
-	colInfo{Name: "fullurl", Label: "Full Url", Datatype: "url", Bar: false, Editable: true},
-	colInfo{Name: "alias", Label: "Alias", Datatype: "string", Bar: false, Editable: true},
-	colInfo{Name: "shorturl", Label: "Short Url", Datatype: "url", Bar: false, Editable: false},
-	colInfo{Name: "action", Label: "Actions", Datatype: "html", Bar: true, Editable: false},
+	{Name: "fullurl", Label: "Full Url", Datatype: "url", Bar: false, Editable: true},
+	{Name: "alias", Label: "Alias", Datatype: "string", Bar: false, Editable: true},
+	{Name: "shorturl", Label: "Short Url", Datatype: "url", Bar: false, Editable: false},
+	{Name: "action", Label: "Actions", Datatype: "html", Bar: true, Editable: false},
 }
 
 //func main() {

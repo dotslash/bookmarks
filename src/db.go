@@ -103,6 +103,33 @@ func addUrlAndAlias(alias string, orig string, overwrite bool) bool {
 	return true
 }
 
+func getShortUrls(secret string, orig string) []string {
+	show_hidden := secret == actual_secret
+	statement := "select alias from aliases where orig = ? and alias not like '\\_%' escape '\\'"
+	if show_hidden {
+		statement = "select alias from aliases where orig = ?"
+	}
+	stmt, err := db.Prepare(statement)
+	if err != nil {
+		Log.Fatal(err)
+	}
+	defer stmt.Close()
+
+	rows, err := stmt.Query(orig)
+	if err != nil {
+		Log.Fatal(err)
+	}
+	defer rows.Close()
+	ret := []string{}
+	for rows.Next() {
+		var short string
+		rows.Scan(&short)
+		Log.Println(short)
+		ret = append(ret, short)
+	}
+	return ret
+}
+
 func getAllAliases(secret string) aliasInfos {
 	show_hidden := secret == actual_secret
 	stmt, err := db.Prepare("select orig, alias, rec_id from aliases")
@@ -175,7 +202,6 @@ func delAlias(alias string, secret string) string {
 	} else {
 		return "Could not write"
 	}
-	return "ok"
 }
 func updateAlias(presAlias, oldVal, newVal, colname, secret string) string {
 	if secret != actual_secret {

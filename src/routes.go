@@ -54,4 +54,17 @@ var routes = Routes{
 		"/actions/update",
 		ActionUpdate,
 	},
+	Route{
+		"ActionLookup",
+		[]string{"GET", "POST"},
+		"/actions/lookup",
+		ActionLookup,
+	},
+	Route{
+		"ActionRevLookup",
+		[]string{"GET", "POST"},
+		"/actions/revlookup",
+		ActionRevLookup,
+	},
+
 }
