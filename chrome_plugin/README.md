@@ -1,4 +1,4 @@
-This is a simple chrome extension I (wish/plan) use to bookmark urls and give a custom handle, 
+This is a simple chrome extension I (wish/plan to) use to bookmark urls and give a custom handle, 
 E.g. [suram.in/r/latency-numbers](http://suram.in/r/latency-numbers) will redirect to
 [https://gist.github.com/jboner/2841832](https://gist.github.com/jboner/2841832)
 
