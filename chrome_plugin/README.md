@@ -3,7 +3,7 @@ E.g. [suram.in/r/latency-numbers](http://suram.in/r/latency-numbers) will redire
 [https://gist.github.com/jboner/2841832](https://gist.github.com/jboner/2841832)
 
 The extension adds a popup next to the address bar, which on clicking lets the user (me) add custom handles to current tab
-url.If there are any some handles to current tab url, the extension shows them all. See the below examples
+url.If there are any handles to current tab url, the extension shows them all. 
 
 Check the screenshots to see how the extention looks when
 - Wrong secret entered when adding a handle
