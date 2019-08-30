@@ -11,7 +11,7 @@ import (
 )
 
 var db = getDbCxn()
-var actual_secret = getSecret()
+var actualSecret = getSecret()
 
 func getDbCxn() *sql.DB {
 	Log.Info("starting DB cxn")
@@ -20,7 +20,7 @@ func getDbCxn() *sql.DB {
 		Log.Error(err)
 	}
 	var dbpath = dir + "/foo.db"
-	Log.Println("dbpath %s", dbpath)
+	Log.Printf("dbpath %v", dbpath)
 	db, err := sql.Open("sqlite3", dbpath)
 	if err != nil {
 		Log.Fatal(err)
@@ -74,9 +74,9 @@ func urlFromAlias(alias string) *string {
 	return nil
 }
 
-func addUrlAndAlias(alias string, orig string, overwrite bool) bool {
-	prev_val := urlFromAlias(alias)
-	if !overwrite && prev_val != nil {
+func addURLAndAlias(alias string, orig string, overwrite bool) bool {
+	prevVal := urlFromAlias(alias)
+	if !overwrite && prevVal != nil {
 		Log.Println("returning because alias is already there")
 		return false
 	}
@@ -105,9 +105,9 @@ func addUrlAndAlias(alias string, orig string, overwrite bool) bool {
 }
 
 func getShortUrls(secret string, orig string) []string {
-	show_hidden := secret == actual_secret
+	showHidden := secret == actualSecret
 	statement := "select alias from aliases where orig = ? and alias not like '\\_%' escape '\\'"
-	if show_hidden {
+	if showHidden {
 		statement = "select alias from aliases where orig = ?"
 	}
 	stmt, err := db.Prepare(statement)
@@ -132,7 +132,7 @@ func getShortUrls(secret string, orig string) []string {
 }
 
 func getAllAliases(secret string) aliasInfos {
-	show_hidden := secret == actual_secret
+	showHidden := secret == actualSecret
 	stmt, err := db.Prepare("select orig, alias, rec_id from aliases")
 	if err != nil {
 		Log.Fatal(err)
@@ -148,13 +148,13 @@ func getAllAliases(secret string) aliasInfos {
 	for rows.Next() {
 		var orig string
 		var alias string
-		var rec_id int
-		rows.Scan(&orig, &alias, &rec_id)
-		if strings.HasPrefix(alias, "_") && !show_hidden {
+		var recID int
+		rows.Scan(&orig, &alias, &recID)
+		if strings.HasPrefix(alias, "_") && !showHidden {
 			continue
 		}
-		str_id := strconv.Itoa(rec_id)
-		ret = append(ret, AliasInfo{Alias: alias, Orig: orig, id: str_id})
+		strID := strconv.Itoa(recID)
+		ret = append(ret, AliasInfo{Alias: alias, Orig: orig, id: strID})
 	}
 	return ret
 
@@ -183,29 +183,29 @@ func delByAlias(alias string) bool {
 }
 
 func addAlias(orig string, alias string, secret string) string {
-	if secret != actual_secret {
+	if secret != actualSecret {
 		return "Secret Did not match"
 	}
-	success := addUrlAndAlias(alias, orig, false)
+	success := addURLAndAlias(alias, orig, false)
 	if success {
 		return "ok"
-	} else {
-		return "Could not write"
 	}
+	return "Could not write"
 }
+
 func delAlias(alias string, secret string) string {
-	if secret != actual_secret {
+	if secret != actualSecret {
 		return "Secret Did not match"
 	}
 	success := delByAlias(alias)
 	if success {
 		return "ok"
-	} else {
-		return "Could not write"
 	}
+	return "Could not write"
 }
+
 func updateAlias(presAlias, oldVal, newVal, colname, secret string) string {
-	if secret != actual_secret {
+	if secret != actualSecret {
 		return "secret did not match"
 	}
 	query := `

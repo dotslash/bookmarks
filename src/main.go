@@ -6,13 +6,16 @@ import (
 	"os"
 )
 
-var server_prefix string
+// ServerAddress is server address the bookmarks server is running as.
+// TODO(dotslash): Inject this into the router as opposed to making
+// this a constant.
+var ServerAddress string
 
 func main() {
 	fmt.Println("starting")
 	argsWithoutProg := os.Args[1:]
 	Log.Info("args", argsWithoutProg)
-	server_prefix = argsWithoutProg[0]
+	ServerAddress = argsWithoutProg[0]
 	port := argsWithoutProg[1]
 	router := NewRouter()
 	Log.Warn(http.ListenAndServe(":"+port, router))
