@@ -11,7 +11,7 @@ import (
 )
 
 var db = getDbCxn()
-var actual_secret = *getSecret()
+var actual_secret = getSecret()
 
 func getDbCxn() *sql.DB {
 	Log.Info("starting DB cxn")
@@ -29,7 +29,7 @@ func getDbCxn() *sql.DB {
 	return db
 }
 
-func getSecret() *string {
+func getSecret() string {
 	stmt, err := db.Prepare("select value from config where key = 'bm_secret'")
 	if err != nil {
 		Log.Fatal(err)
@@ -46,9 +46,10 @@ func getSecret() *string {
 		var orig string
 		rows.Scan(&orig)
 		Log.Println(orig)
-		return &orig
+		return orig
 	}
-	return nil
+	// No secret => return ""
+	return ""
 }
 
 func urlFromAlias(alias string) *string {

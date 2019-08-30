@@ -6,8 +6,9 @@ import (
 	"os/user"
 	"time"
 
-	log "github.com/Sirupsen/logrus"
 	"github.com/rifflock/lfshook"
+	"github.com/sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 )
 
 var Log *log.Logger = newLogger()
@@ -32,10 +33,12 @@ func newLogger() *log.Logger {
 	usr, _ := user.Current()
 	home := usr.HomeDir
 	lLog := log.New()
-	lLog.Hooks.Add(lfshook.NewHook(lfshook.PathMap{
-		log.InfoLevel:  home + "/log/bm-info.log",
-		log.ErrorLevel: home + "/log/bm-error.log",
-	}))
+	lLog.Hooks.Add(lfshook.NewHook(
+		lfshook.PathMap{
+			log.InfoLevel:  home + "/log/bm-info.log",
+			log.ErrorLevel: home + "/log/bm-error.log",
+		},
+		&logrus.TextFormatter{}))
 	lLog.Info("got logger in", time.Since(start))
 	return lLog
 }
