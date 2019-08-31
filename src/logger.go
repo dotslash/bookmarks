@@ -8,12 +8,13 @@ import (
 
 	"github.com/rifflock/lfshook"
 	"github.com/sirupsen/logrus"
-	log "github.com/sirupsen/logrus"
 )
 
-var Log *log.Logger = newLogger()
+// Log is the logging object used by the binary.
+var Log *logrus.Logger = newLogger()
 
-func Logger(inner http.Handler, name string) http.Handler {
+// HTTPLogger returns a http.Handler that logs the http request.
+func HTTPLogger(inner http.Handler, name string) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		start := time.Now()
 		inner.ServeHTTP(w, r)
@@ -27,16 +28,16 @@ func Logger(inner http.Handler, name string) http.Handler {
 	})
 }
 
-func newLogger() *log.Logger {
+func newLogger() *logrus.Logger {
 	fmt.Println("getting logger")
 	start := time.Now()
 	usr, _ := user.Current()
 	home := usr.HomeDir
-	lLog := log.New()
+	lLog := logrus.New()
 	lLog.Hooks.Add(lfshook.NewHook(
 		lfshook.PathMap{
-			log.InfoLevel:  home + "/log/bm-info.log",
-			log.ErrorLevel: home + "/log/bm-error.log",
+			logrus.InfoLevel:  home + "/log/bm-info.log",
+			logrus.ErrorLevel: home + "/log/bm-error.log",
 		},
 		&logrus.TextFormatter{}))
 	lLog.Info("got logger in", time.Since(start))

@@ -1,11 +1,10 @@
 Bookmarks
 =========
 
-This is the code for [bm.suram.in](http://bm.suram.in). I use this to bookmark websites with custom redirect URLs.  The website is written completely in Go (earlier ~~PHP~~). 
-What makes this more usable to me is this library called [editable grid](https://github.com/webismymind/editablegrid).
+This is the code for [bm.suram.in](http://bm.suram.in). I use this to bookmark websites with custom redirect URLs. 
 
-I use sqlite (the poor man's DB!) to persist data. The code expects a `foo.db` (yes,Im lazy) in the `src` directory. Find the db schema below
-```
+The application is written in Go and uses [editable grid](https://github.com/webismymind/editablegrid) to list/search/update the bookmarked URLs. The app uses sqlite (the poor man's DB!) to persist data. It expects a `foo.db` in the `src` directory. Find the db schema below
+```sql
 CREATE TABLE "aliases" (
     `orig` TEXT,
     `alias`TEXT UNIQUE,
@@ -24,13 +23,16 @@ CREATE TABLE `config` (
 There is one more useful functionality which will hide any bookmark with alias that starts with `_` unless the secret is typed.
 
 
-To start the server run `go run src/*.go http://localhost:8085 8085`  
-The logs would go to `~/log/bm-info.log`, `~/log/bm-error.log`
+To start the server do the following from `src` directory.
+```
+go build -o bookmarks.bin *.go
+./bookmarks.bin http://localhost:8085 8085
+```
+The logs will go to `~/log/bm-info.log`, `~/log/bm-error.log`
 
-**Credits** : This is my first task/mini-project on Go and the code is heavily borrowed from [thenewstack.io/make-a-restful-json-api-go](http://thenewstack.io/make-a-restful-json-api-go/)
 
 Chrome Extension
 ================
 
-I also have a chrom extension compatible with the bookmarking site. Check out its [Readme](https://github.com/dotslash/bookmarks/tree/master/chrome_plugin) 
+The application also comes with a compatible chrome extension. Check out its [Readme](https://github.com/dotslash/bookmarks/tree/master/chrome_plugin) 
 

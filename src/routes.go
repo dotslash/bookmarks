@@ -2,13 +2,22 @@ package main
 
 import "net/http"
 
+// Route contains information about the route and
+// also the route's http handler/
 type Route struct {
-	Name        string
-	Methods     []string
-	Pattern     string
+	// Name of the route.
+	Name string
+	// HTTP methods supported by the route.
+	// E.g - GET, POST etc.
+	Methods []string
+	// Url Pattern that this route can handle.
+	Pattern string
+	// http Handler for the route.
 	HandlerFunc http.HandlerFunc
 }
 
+// Routes is an array of routes
+// TODO(dotslash): Remove this.
 type Routes []Route
 
 var routes = Routes{
@@ -66,5 +75,4 @@ var routes = Routes{
 		"/actions/revlookup",
 		ActionRevLookup,
 	},
-
 }

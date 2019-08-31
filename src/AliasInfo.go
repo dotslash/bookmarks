@@ -18,9 +18,10 @@ func makeViewResponse(aliases []AliasInfo, serverPrefix string) viewResponse {
 }
 
 func makeRevLookUpResponse(shortUrls []string) revLookupResponse {
-	return revLookupResponse{ShortUrls:shortUrls}
+	return revLookupResponse{ShortUrls: shortUrls}
 }
 
+// AliasInfo contains info about a shortened alias.
 type AliasInfo struct {
 	Alias string
 	Orig  string
@@ -29,7 +30,7 @@ type AliasInfo struct {
 
 func (a *AliasInfo) toRow(prefix string) row {
 	info := rowInfo{Fullurl: a.Orig, Alias: a.Alias, Shorturl: prefix + a.Alias}
-	return row{Id: a.Alias, Values: info}
+	return row{ID: a.Alias, Values: info}
 }
 
 // Column Info : Metadata
@@ -51,7 +52,7 @@ type rowInfo struct {
 }
 
 type row struct {
-	Id     string  `json:"id"`
+	ID     string  `json:"id"`
 	Values rowInfo `json:"values"`
 }
 
