@@ -3,7 +3,7 @@ Bookmarks
 
 This is the code for [bm.suram.in](http://bm.suram.in). I use this to bookmark websites with custom redirect URLs. 
 
-The application is written in Go and uses [editable grid](https://github.com/webismymind/editablegrid) to list/search/update the bookmarked URLs. The app uses sqlite (the poor man's DB!) to persist data. It expects a `foo.db` in the `src` directory. Find the db schema below
+The application is written in Go and uses [editable grid](https://github.com/webismymind/editablegrid) to list/search/update the bookmarked URLs. The app uses sqlite (the poor man's DB!) to persist data. It expects a `foo.db` in the `src` directory. Find the db schema below. (https://sqliteonline.com/#fiddle-5d6c0626e3699dmuk01a04iq)
 ```sql
 CREATE TABLE "aliases" (
     `orig` TEXT,
@@ -17,9 +17,9 @@ CREATE TABLE `config` (
 	`value`	TEXT,
 	PRIMARY KEY(key)
 )
-# In config table there needs to be a record with key='bm_secret' and value='{YOUR_SECRET_KEY}' 
 ```
-*Note* : Even though the website is publicly accessible, content can be modified only be me (One has to enter the secret key to edit content).
+*Note* : Even though the website is publicly accessible, content can be modified only be me (One has to enter the secret key to edit content). To enable this feature there needs to be a record with key=`bm_secret` and value=`{YOUR_SECRET_KEY}` in the `config` table. 
+
 There is one more useful functionality which will hide any bookmark with alias that starts with `_` unless the secret is typed.
 
 
