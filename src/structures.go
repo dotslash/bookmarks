@@ -77,9 +77,3 @@ type ErrStruct struct {
 	Code int    `json:"code"`
 	Text string `json:"text"`
 }
-
-//func main() {
-//	d,_ := json.Marshal(md)
-//	log.Println(string(d))
-//	log.Println(md)
-//}

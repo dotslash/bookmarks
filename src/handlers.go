@@ -5,16 +5,27 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+	"sync"
 
 	"github.com/gorilla/mux"
 )
+
+var once sync.Once
+var storage *StorageInterface
+
+func getStorage() *StorageInterface {
+	once.Do(func() {
+		storage = NewStorageInterface()
+	})
+	return storage
+}
 
 // ActionView handles http request to view bookmarks list.
 func ActionView(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.WriteHeader(http.StatusOK)
 	secret := r.FormValue("secret")
-	aliasInfos := getAllAliases(secret)
+	aliasInfos := getStorage().GetAllAliases(secret)
 	resp := CreateViewResponse(aliasInfos, ServerAddress)
 	if err := json.NewEncoder(w).Encode(resp); err != nil {
 		Log.Fatal(err)
@@ -26,7 +37,7 @@ func ActionLookup(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.WriteHeader(http.StatusOK)
 	short := r.FormValue("short")
-	fullURL := urlFromAlias(short)
+	fullURL := getStorage().URLFromAlias(short)
 	if fullURL == nil {
 		w.WriteHeader(http.StatusNotFound)
 		fmt.Fprint(w, "Not Found")
@@ -41,7 +52,7 @@ func ActionRevLookup(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	secret := r.FormValue("secret")
 	long := r.FormValue("long")
-	shortUrls := getShortUrls(secret, long)
+	shortUrls := getStorage().GetShortUrls(secret, long)
 	resp := RevLookupResponse{shortUrls}
 	if err := json.NewEncoder(w).Encode(resp); err != nil {
 		Log.Fatal(err)
@@ -54,7 +65,7 @@ func ActionAdd(w http.ResponseWriter, r *http.Request) {
 	long := r.FormValue("url")
 	secret := r.FormValue("secret")
 	Log.Println(short, long, secret)
-	respStr := addAlias(long, short, secret)
+	respStr := getStorage().AddAlias(long, short, secret)
 	fmt.Fprint(w, respStr)
 }
 
@@ -63,7 +74,7 @@ func ActionDel(w http.ResponseWriter, r *http.Request) {
 	short := r.FormValue("id")
 	secret := r.FormValue("secret")
 	Log.Println("formparams", short, secret)
-	respStr := delAlias(short, secret)
+	respStr := getStorage().DelAlias(short, secret)
 	fmt.Fprint(w, respStr)
 }
 
@@ -75,7 +86,7 @@ func ActionUpdate(w http.ResponseWriter, r *http.Request) {
 	colName := r.FormValue("colname")
 	secret := r.FormValue("secret")
 	Log.Println("formparams:(presAlias, new, old, field)", presAlias, newVal, oldVal, colName)
-	respStr := updateAlias(presAlias, oldVal, newVal, colName, secret)
+	respStr := getStorage().UpdateAlias(presAlias, oldVal, newVal, colName, secret)
 	fmt.Fprint(w, respStr)
 }
 
@@ -83,7 +94,7 @@ func ActionUpdate(w http.ResponseWriter, r *http.Request) {
 func Redirect(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	redID := vars["redId"]
-	url := urlFromAlias(redID)
+	url := getStorage().URLFromAlias(redID)
 	if url != nil {
 		var urlStr = *url
 		if !strings.HasPrefix(urlStr, "http://") && !strings.HasPrefix(urlStr, "https://") {
