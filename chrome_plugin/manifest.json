@@ -1,8 +1,8 @@
 {
     "manifest_version": 2,
 
-    "name": "Getting started example",
-    "description": "This extension shows a Google Image search result for the current page",
+    "name": "Bookmarks",
+    "description": "A simple chrome extension to interact with https://github.com/dotslash/bookmark",
     "version": "1.0",
 
     "browser_action": {
@@ -12,7 +12,7 @@
     "permissions": [
         "activeTab",
         "https://ajax.googleapis.com/",
-        "https://yesteapea.com/"
+        "https://bm.suram.in/"
     ],
     "background": {
         "scripts": ["js/jquery-3.1.0.min.js"]

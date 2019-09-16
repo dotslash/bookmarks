@@ -1,9 +1,11 @@
+var server_address = "https://bm.suram.in"
+
 function setShortAlias(tabs) {
     var short = $("#short_id").val();
     var secret = $("#secret").val();
     var url = tabs[0].url;
     $.ajax({
-        url: 'https://yesteapea.com/bm/actions/add',
+        url: server_address + '/actions/add',
         type: 'POST',
         dataType: "html",
         data: {
@@ -14,7 +16,7 @@ function setShortAlias(tabs) {
         success: function (response) {
             console.log(response);
             if (response == "ok") {
-                var s_url = `http://suram.in/r/${short}`;
+                var s_url = server_address + `/r/${short}`;
                 var message = `Added <a href='${s_url}'>${s_url}</a> as alias`;
                 $("#result").html(message);
             } else {
@@ -31,7 +33,7 @@ function setShortAlias(tabs) {
 function getExistingShortAliases(tabs) {
     var url = tabs[0].url;
     $.ajax({
-        url: 'https://yesteapea.com/bm/actions/revlookup',
+        url: server_address + '/actions/revlookup',
         type: 'POST',
         data: {
             long: url
@@ -40,7 +42,7 @@ function getExistingShortAliases(tabs) {
             console.log(response);
             if (response.shorturls.length != 0) {
                 var short_to_anchor = function (short) {
-                    var s_url = `http://suram.in/r/${short}`;
+                    var s_url = server_address + `/r/${short}`;
                     return `<a href='${s_url}'>${s_url}</a>`;
                 };
                 var short_urls = response.shorturls.map(short_to_anchor).join("<br>");
