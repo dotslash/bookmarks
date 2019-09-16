@@ -3,7 +3,9 @@ Bookmarks
 
 This is the code for [bm.suram.in](http://bm.suram.in). I use this to bookmark websites with custom redirect URLs. 
 
-The application is written in Go and uses [editable grid](https://github.com/webismymind/editablegrid) to list/search/update the bookmarked URLs. The app uses sqlite (the poor man's DB!) to persist data. It expects a `foo.db` in the `src` directory. Find the db schema below. (https://sqliteonline.com/#fiddle-5d6c0626e3699dmuk01a04iq)
+The application is written in Go and uses [editable grid](https://github.com/webismymind/editablegrid) to list/search/update the bookmarked URLs. The app uses sqlite (the poor man's DB!) to persist data. It expects a `foo.db` in `bookmarks/bookmarks` directory. 
+
+To get an empty sqlite file with the correct schema, use this online utility - https://sqliteonline.com/#fiddle-5d6c0626e3699dmuk01a04iq
 ```sql
 CREATE TABLE "aliases" (
     `orig` TEXT,
@@ -17,19 +19,28 @@ CREATE TABLE `config` (
 	`value`	TEXT,
 	PRIMARY KEY(key)
 )
+
 ```
-*Note* : Even though the website is publicly accessible, content can be modified only be me (One has to enter the secret key to edit content). To enable this feature there needs to be a record with key=`bm_secret` and value=`{YOUR_SECRET_KEY}` in the `config` table. 
+## Admin features
+The application has 2 "admin" features. To enable these features there needs to be a record with key set to `bm_secret` and value set to `{YOUR_SECRET_KEY}` in the `config` table. 
+1. After this, content can be modified only if the correct secret is passed in the request.
+2. Any bookmark with alias that starts with `_` will be hidden unless the secret is passed in the request.
 
-There is one more useful functionality which will hide any bookmark with alias that starts with `_` unless the secret is typed.
-
-
-To start the server do the following from `src` directory.
-```
+## Installation
+Do the following from `bookmarks/bookmarks` directory to start the server.
+```sh
 go build -o bookmarks.bin *.go
 ./bookmarks.bin http://localhost:8085 8085
 ```
+
+Alternatively run `go install` command from `bookmarks/bookmarks` directory.
+```sh
+go install
+$GOPATH/bin/bookmarks http://localhost:8085 8085
+```
 The logs will go to `~/log/bm-info.log`, `~/log/bm-error.log`
 
+Check `supervisor_aws.conf` to see how I install the server.
 
 Chrome Extension
 ================
