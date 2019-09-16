@@ -24,16 +24,15 @@ func getRoutes() []routeStruct {
 	getOnly := []string{"GET"}
 	getAndPost := []string{"GET", "POST"}
 	return []routeStruct{
-		routeStruct{"Redirect", getOnly, "/red/{redId}", Redirect},
-		routeStruct{"Redirect", getOnly, "/r/{redId}", Redirect},
-		routeStruct{"ActionView", getAndPost, "/actions/view", ActionView},
-		routeStruct{"ActionAdd", getAndPost, "/actions/add", ActionAdd},
-		routeStruct{"ActionDel", getAndPost, "/actions/delete", ActionDel},
-		routeStruct{"ActionDel", getAndPost, "/actions/delete", ActionDel},
-		routeStruct{"ActionUpdate", getAndPost, "/actions/update", ActionUpdate},
-		routeStruct{"ActionLookup", getAndPost, "/actions/lookup", ActionLookup},
-		routeStruct{
-			"ActionRevLookup", getAndPost, "/actions/revlookup", ActionRevLookup},
+		{"Redirect", getOnly, "/red/{redId}", Redirect},
+		{"Redirect", getOnly, "/r/{redId}", Redirect},
+		{"ActionView", getAndPost, "/actions/view", ActionView},
+		{"ActionAdd", getAndPost, "/actions/add", ActionAdd},
+		{"ActionDel", getAndPost, "/actions/delete", ActionDel},
+		{"ActionDel", getAndPost, "/actions/delete", ActionDel},
+		{"ActionUpdate", getAndPost, "/actions/update", ActionUpdate},
+		{"ActionLookup", getAndPost, "/actions/lookup", ActionLookup},
+		{"ActionRevLookup", getAndPost, "/actions/revlookup", ActionRevLookup},
 	}
 }
 

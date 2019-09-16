@@ -15,7 +15,7 @@ func ActionView(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	secret := r.FormValue("secret")
 	aliasInfos := getAllAliases(secret)
-	resp := makeViewResponse(aliasInfos, ServerAddress)
+	resp := CreateViewResponse(aliasInfos, ServerAddress)
 	if err := json.NewEncoder(w).Encode(resp); err != nil {
 		Log.Fatal(err)
 	}
@@ -42,7 +42,7 @@ func ActionRevLookup(w http.ResponseWriter, r *http.Request) {
 	secret := r.FormValue("secret")
 	long := r.FormValue("long")
 	shortUrls := getShortUrls(secret, long)
-	resp := makeRevLookUpResponse(shortUrls)
+	resp := RevLookupResponse{shortUrls}
 	if err := json.NewEncoder(w).Encode(resp); err != nil {
 		Log.Fatal(err)
 	}
@@ -96,7 +96,9 @@ func Redirect(w http.ResponseWriter, r *http.Request) {
 	// If we didn't find it, 404
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.WriteHeader(http.StatusNotFound)
-	if err := json.NewEncoder(w).Encode(jsonErr{Code: http.StatusNotFound, Text: "Not Found"}); err != nil {
+	err := json.NewEncoder(w).Encode(
+		ErrStruct{Code: http.StatusNotFound, Text: "Not Found"})
+	if err != nil {
 		panic(err)
 	}
 }

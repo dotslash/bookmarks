@@ -131,7 +131,7 @@ func getShortUrls(secret string, orig string) []string {
 	return ret
 }
 
-func getAllAliases(secret string) aliasInfos {
+func getAllAliases(secret string) []AliasInfo {
 	showHidden := secret == actualSecret
 	stmt, err := db.Prepare("select orig, alias, rec_id from aliases")
 	if err != nil {
@@ -144,7 +144,7 @@ func getAllAliases(secret string) aliasInfos {
 		Log.Fatal(err)
 	}
 	defer rows.Close()
-	var ret aliasInfos
+	var ret []AliasInfo
 	for rows.Next() {
 		var orig string
 		var alias string
@@ -238,13 +238,13 @@ func updateAlias(presAlias, oldVal, newVal, colname, secret string) string {
 	return "ok"
 }
 
-//func main() {
-//	Log.Println(addUrlAndAlias("abs", "abs.com", false))
-//	x := urlFromAlias("abs")
-//	Log.Println("url %s", *x)
-//	Log.Println(*x)
-//	Log.Println(addUrlAndAlias("abs", "abs.com", false))
-//	Log.Println(addUrlAndAlias("abs", *x + "1", true))
-//	Log.Println(secret)
-//	Log.Println(getAllAliases())
-//}
+// func main() {
+// 	Log.Println(addUrlAndAlias("abs", "abs.com", false))
+// 	x := urlFromAlias("abs")
+// 	Log.Println("url %s", *x)
+// 	Log.Println(*x)
+// 	Log.Println(addUrlAndAlias("abs", "abs.com", false))
+// 	Log.Println(addUrlAndAlias("abs", *x + "1", true))
+// 	Log.Println(secret)
+// 	Log.Println(getAllAliases())
+// }
