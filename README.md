@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.com/dotslash/bookmarks.svg?branch=master)](https://travis-ci.com/dotslash/bookmarks)
+
 Bookmarks
 =========
 
