@@ -10,34 +10,43 @@ import (
 	"github.com/gorilla/mux"
 )
 
-var once sync.Once
-var storage *StorageInterface
+// Handlers struct has methods to handle http requests to be served by
+// the webserver.
+type Handlers struct {
+	once    sync.Once
+	storage *StorageInterface
+	// Address of the server hosting the application. This will be used
+	// to generate short urls. E.g - https://bm.suram.in/r/foo
+	serverAddress string
+	// Location of the sqlite file.
+	dbFile string
+}
 
-func getStorage() *StorageInterface {
-	once.Do(func() {
-		storage = NewStorageInterface()
+func (h *Handlers) getStorage() *StorageInterface {
+	h.once.Do(func() {
+		h.storage = NewStorageInterface(h.dbFile)
 	})
-	return storage
+	return h.storage
 }
 
 // ActionView handles http request to view bookmarks list.
-func ActionView(w http.ResponseWriter, r *http.Request) {
+func (h *Handlers) ActionView(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.WriteHeader(http.StatusOK)
 	secret := r.FormValue("secret")
-	aliasInfos := getStorage().GetAllAliases(secret)
-	resp := CreateViewResponse(aliasInfos, ServerAddress)
+	aliasInfos := h.getStorage().GetAllAliases(secret)
+	resp := CreateViewResponse(aliasInfos, h.serverAddress)
 	if err := json.NewEncoder(w).Encode(resp); err != nil {
 		Log.Fatal(err)
 	}
 }
 
 // ActionLookup handles http request to convert short url to the full url.
-func ActionLookup(w http.ResponseWriter, r *http.Request) {
+func (h *Handlers) ActionLookup(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.WriteHeader(http.StatusOK)
 	short := r.FormValue("short")
-	fullURL := getStorage().URLFromAlias(short)
+	fullURL := h.getStorage().URLFromAlias(short)
 	if fullURL == nil {
 		w.WriteHeader(http.StatusNotFound)
 		fmt.Fprint(w, "Not Found")
@@ -47,12 +56,12 @@ func ActionLookup(w http.ResponseWriter, r *http.Request) {
 }
 
 // ActionRevLookup handles http request to convert full url to the short url.
-func ActionRevLookup(w http.ResponseWriter, r *http.Request) {
+func (h *Handlers) ActionRevLookup(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.WriteHeader(http.StatusOK)
 	secret := r.FormValue("secret")
 	long := r.FormValue("long")
-	shortUrls := getStorage().GetShortUrls(secret, long)
+	shortUrls := h.getStorage().GetShortUrls(secret, long)
 	resp := RevLookupResponse{shortUrls}
 	if err := json.NewEncoder(w).Encode(resp); err != nil {
 		Log.Fatal(err)
@@ -60,41 +69,41 @@ func ActionRevLookup(w http.ResponseWriter, r *http.Request) {
 }
 
 // ActionAdd handles http request to add a new bookmark.
-func ActionAdd(w http.ResponseWriter, r *http.Request) {
+func (h *Handlers) ActionAdd(w http.ResponseWriter, r *http.Request) {
 	short := r.FormValue("short")
 	long := r.FormValue("url")
 	secret := r.FormValue("secret")
 	Log.Println(short, long, secret)
-	respStr := getStorage().AddAlias(long, short, secret)
+	respStr := h.getStorage().AddAlias(long, short, secret)
 	fmt.Fprint(w, respStr)
 }
 
 // ActionDel handles http request to add a delete bookmark.
-func ActionDel(w http.ResponseWriter, r *http.Request) {
+func (h *Handlers) ActionDel(w http.ResponseWriter, r *http.Request) {
 	short := r.FormValue("id")
 	secret := r.FormValue("secret")
 	Log.Println("formparams", short, secret)
-	respStr := getStorage().DelAlias(short, secret)
+	respStr := h.getStorage().DelAlias(short, secret)
 	fmt.Fprint(w, respStr)
 }
 
 // ActionUpdate handles http request to add a update bookmark.
-func ActionUpdate(w http.ResponseWriter, r *http.Request) {
+func (h *Handlers) ActionUpdate(w http.ResponseWriter, r *http.Request) {
 	presAlias := r.FormValue("id")
 	newVal := r.FormValue("newvalue")
 	oldVal := r.FormValue("oldvalue")
 	colName := r.FormValue("colname")
 	secret := r.FormValue("secret")
 	Log.Println("formparams:(presAlias, new, old, field)", presAlias, newVal, oldVal, colName)
-	respStr := getStorage().UpdateAlias(presAlias, oldVal, newVal, colName, secret)
+	respStr := h.getStorage().UpdateAlias(presAlias, oldVal, newVal, colName, secret)
 	fmt.Fprint(w, respStr)
 }
 
 // Redirect handles redirect for short url to full url.
-func Redirect(w http.ResponseWriter, r *http.Request) {
+func (h *Handlers) Redirect(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	redID := vars["redId"]
-	url := getStorage().URLFromAlias(redID)
+	url := h.getStorage().URLFromAlias(redID)
 	if url != nil {
 		var urlStr = *url
 		if !strings.HasPrefix(urlStr, "http://") && !strings.HasPrefix(urlStr, "https://") {

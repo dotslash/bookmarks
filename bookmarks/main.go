@@ -1,3 +1,8 @@
+// Entry point to the bookmarks server.
+// Example usage: ./bookmarks.bin https://bm.suram.in 8085
+// arg1 : Address of the server hosting the application. This will be used
+//        to generate short urls. E.g - https://bm.suram.in/r/foo
+// arg2 : port to run the http server at.
 package main
 
 import (
@@ -6,17 +11,20 @@ import (
 	"os"
 )
 
-// ServerAddress is server address the bookmarks server is running as.
-// TODO(dotslash): Inject this into the router as opposed to making
-// this a constant.
-var ServerAddress string
-
 func main() {
 	fmt.Println("starting")
 	argsWithoutProg := os.Args[1:]
 	Log.Info("args", argsWithoutProg)
-	ServerAddress = argsWithoutProg[0]
+	// Get port and server address.
+	ServerAddress := argsWithoutProg[0]
 	port := argsWithoutProg[1]
-	router := NewRouter()
+	// Get dbFile path.
+	pwd, err := os.Getwd()
+	if err != nil {
+		panic(fmt.Errorf("os.Getwd failed. %v", err))
+	}
+	dbFile := pwd + "/foo.db"
+	// Launch server.
+	router := NewRouter(ServerAddress, dbFile)
 	Log.Warn(http.ListenAndServe(":"+port, router))
 }

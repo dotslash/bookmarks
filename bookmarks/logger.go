@@ -28,6 +28,8 @@ func HTTPLogger(inner http.Handler, name string) http.Handler {
 	})
 }
 
+// TODO(dotslash): Currently running tests also creates log files in ~/log
+// directory. This needs to be fixed.
 func newLogger() *logrus.Logger {
 	fmt.Println("getting logger")
 	start := time.Now()

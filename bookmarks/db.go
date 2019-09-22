@@ -3,21 +3,13 @@ package main
 import (
 	"database/sql"
 	"fmt"
-	"os"
 	"strconv"
 	"strings"
 
 	_ "github.com/mattn/go-sqlite3"
 )
 
-func getDbCxn() (*sql.DB, error) {
-	Log.Info("starting DB cxn")
-	dir, err := os.Getwd()
-	if err != nil {
-		Log.Error(err)
-		return nil, err
-	}
-	var dbpath = dir + "/foo.db"
+func getDbCxn(dbpath string) (*sql.DB, error) {
 	Log.Printf("dbpath %v", dbpath)
 	db, err := sql.Open("sqlite3", dbpath)
 	if err != nil {
@@ -59,11 +51,12 @@ type StorageInterface struct {
 }
 
 // NewStorageInterface creates and initializes a new storage interface object.
-func NewStorageInterface() *StorageInterface {
-	s := &StorageInterface{}
-	s.db, _ = getDbCxn()
-	s.secret = getSecret(s.db)
-	return s
+func NewStorageInterface(dbFile string) *StorageInterface {
+	db, err := getDbCxn(dbFile)
+	if err != nil {
+		panic(fmt.Errorf("Failed to open sqlite connection: %v", err))
+	}
+	return &StorageInterface{db: db, secret: getSecret(db)}
 }
 
 // URLFromAlias returns the full url for the given `alias`.

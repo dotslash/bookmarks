@@ -20,26 +20,27 @@ type routeStruct struct {
 	HandlerFunc http.HandlerFunc
 }
 
-func getRoutes() []routeStruct {
+func getRoutes(serverAddress string, dbFile string) []routeStruct {
 	getOnly := []string{"GET"}
 	getAndPost := []string{"GET", "POST"}
+	handlers := &Handlers{serverAddress: serverAddress, dbFile: dbFile}
 	return []routeStruct{
-		{"Redirect", getOnly, "/red/{redId}", Redirect},
-		{"Redirect", getOnly, "/r/{redId}", Redirect},
-		{"ActionView", getAndPost, "/actions/view", ActionView},
-		{"ActionAdd", getAndPost, "/actions/add", ActionAdd},
-		{"ActionDel", getAndPost, "/actions/delete", ActionDel},
-		{"ActionDel", getAndPost, "/actions/delete", ActionDel},
-		{"ActionUpdate", getAndPost, "/actions/update", ActionUpdate},
-		{"ActionLookup", getAndPost, "/actions/lookup", ActionLookup},
-		{"ActionRevLookup", getAndPost, "/actions/revlookup", ActionRevLookup},
+		{"ActionAdd", getAndPost, "/actions/add", handlers.ActionAdd},
+		{"ActionDel", getAndPost, "/actions/delete", handlers.ActionDel},
+		{"ActionLookup", getAndPost, "/actions/lookup", handlers.ActionLookup},
+		{"ActionRevLookup", getAndPost, "/actions/revlookup", handlers.ActionRevLookup},
+		{"ActionUpdate", getAndPost, "/actions/update", handlers.ActionUpdate},
+		{"ActionView", getAndPost, "/actions/view", handlers.ActionView},
+		{"Redirect", getOnly, "/r/{redId}", handlers.Redirect},
 	}
 }
 
 // NewRouter returns a new mux.Router that handles all incoming http requests.
-func NewRouter() *mux.Router {
+// serverAddress: The server address the bookmarks server is running as.
+//                E.g - https://bm.suram.in
+func NewRouter(serverAddress string, dbFile string) *mux.Router {
 	router := mux.NewRouter()
-	for _, route := range getRoutes() {
+	for _, route := range getRoutes(serverAddress, dbFile) {
 		var handler http.Handler
 		Log.Println(route)
 		handler = route.HandlerFunc
