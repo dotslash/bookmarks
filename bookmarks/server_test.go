@@ -131,16 +131,17 @@ type TestHelper struct {
 	sqliteFile string
 	// httpexpect and require are test utilites for checking expectations
 	// and actual values returned.
+	// httpexpect is tied to requests for `server`.
 	httpexpect *httpexpect.Expect
 	require    *require.Assertions
 }
 
-func (t *TestHelper) cleanup() {
-	t.redirectServer.Close()
-	t.server.Close()
+func (th *TestHelper) cleanup() {
+	th.redirectServer.Close()
+	th.server.Close()
 }
 
-func AddAlias(th *TestHelper, short, url, secret string, ok ...Outcome) {
+func (th *TestHelper) AddAlias(short, url, secret string, ok ...Outcome) {
 	th.require.LessOrEqual(len(ok), 1)
 	expectSuccess := len(ok) == 0 || ok[0]
 	res := th.httpexpect.POST("/actions/add").
@@ -154,7 +155,7 @@ func AddAlias(th *TestHelper, short, url, secret string, ok ...Outcome) {
 	}
 }
 
-func UpdateOrigURL(th *TestHelper, alias, oldLong, newLong, secret string, ok ...Outcome) {
+func (th *TestHelper) UpdateOrigURL(alias, oldLong, newLong, secret string, ok ...Outcome) {
 	th.require.LessOrEqual(len(ok), 1)
 	expectSuccess := len(ok) == 0 || ok[0]
 
@@ -172,7 +173,7 @@ func UpdateOrigURL(th *TestHelper, alias, oldLong, newLong, secret string, ok ..
 
 }
 
-func UpdateAlias(th *TestHelper, oldAlias, newAlias, secret string, ok ...Outcome) {
+func (th *TestHelper) UpdateAlias(oldAlias, newAlias, secret string, ok ...Outcome) {
 	th.require.LessOrEqual(len(ok), 1)
 	expectSuccess := len(ok) == 0 || ok[0]
 
@@ -190,7 +191,7 @@ func UpdateAlias(th *TestHelper, oldAlias, newAlias, secret string, ok ...Outcom
 
 }
 
-func RemoveAlias(th *TestHelper, short, secret string, ok ...Outcome) {
+func (th *TestHelper) RemoveAlias(short, secret string, ok ...Outcome) {
 	th.require.LessOrEqual(len(ok), 1)
 	expectSuccess := len(ok) == 0 || ok[0]
 	res := th.httpexpect.POST("/actions/delete").
@@ -203,7 +204,7 @@ func RemoveAlias(th *TestHelper, short, secret string, ok ...Outcome) {
 	}
 }
 
-func Lookup(th *TestHelper, short, long string, ok ...Outcome) {
+func (th *TestHelper) Lookup(short, long string, ok ...Outcome) {
 	th.require.LessOrEqual(len(ok), 1)
 	expectSuccess := len(ok) == 0 || ok[0]
 	res := th.httpexpect.POST("/actions/lookup").
@@ -215,19 +216,19 @@ func Lookup(th *TestHelper, short, long string, ok ...Outcome) {
 	}
 }
 
-func RevLookup(th *TestHelper, long string, short []interface{}, secret string) {
+func (th *TestHelper) RevLookup(long string, short []interface{}, secret string) {
 	th.httpexpect.POST("/actions/revlookup").
 		WithFormField("long", long).WithFormField("secret", secret).
 		Expect().Status(http.StatusOK).
 		JSON().Path("$.shorturls").Array().ContainsOnly(short...)
 }
-func RedirectIs404(th *TestHelper, short string) {
+func (th *TestHelper) RedirectIs404(short string) {
 	prev := len(*th.redirectReqs)
 	th.httpexpect.GET(short).Expect().StatusRange(httpexpect.Status4xx)
 	th.require.Equal(prev, len(*th.redirectReqs))
 }
 
-func RedirectWorks(th *TestHelper, short, urlPath string) {
+func (th *TestHelper) RedirectWorks(short, urlPath string) {
 	prev := len(*th.redirectReqs)
 	th.httpexpect.GET("/r/" + short).Expect().Text().Equal("redirected")
 	th.require.Equal(prev+1, len(*th.redirectReqs))
@@ -235,7 +236,7 @@ func RedirectWorks(th *TestHelper, short, urlPath string) {
 	th.require.Equal(urlPath, apath)
 }
 
-func ViewBookmarks(th *TestHelper, aliases []AliasInfo, secret string) {
+func (th *TestHelper) ViewBookmarks(aliases []AliasInfo, secret string) {
 	expRespStruct := CreateViewResponse(aliases, testBookMarksServer)
 	actRespStr := th.httpexpect.POST("/actions/view").
 		WithFormField("secret", secret).Expect().
@@ -255,52 +256,52 @@ func TestMutationsAndRedirects(t *testing.T) {
 	defer th.cleanup()
 
 	// Begin: s1, _s1 redirects dont exist.
-	RedirectIs404(&th, "s1")
-	RedirectIs404(&th, "_s1")
+	th.RedirectIs404("s1")
+	th.RedirectIs404("_s1")
 
 	// Add redirects for s1, _s1.
-	AddAlias(&th, "s1", th.redirectServer.URL+"/long1", "strong-secret")
-	AddAlias(&th, "_s1", th.redirectServer.URL+"/_long1", "strong-secret")
+	th.AddAlias("s1", th.redirectServer.URL+"/long1", "strong-secret")
+	th.AddAlias("_s1", th.redirectServer.URL+"/_long1", "strong-secret")
 	// - Check redirects.
 	// NOTE: Eventhough _s1 is a private alias, it will still be redirected
 	//       without needing the secret. Secret is needed for lookups involving
 	//       private alises and all mutations.
-	RedirectWorks(&th, "s1", "/long1")
-	RedirectWorks(&th, "_s1", "/_long1")
+	th.RedirectWorks("s1", "/long1")
+	th.RedirectWorks("_s1", "/_long1")
 
 	// Update long urls for s1, _s1.
-	UpdateOrigURL(&th,
+	th.UpdateOrigURL(
 		"s1",                           // alias
 		th.redirectServer.URL+"/long1", // oldLong
 		th.redirectServer.URL+"/long2", // newLong
 		"strong-secret",                // secret
 	)
-	UpdateOrigURL(&th,
+	th.UpdateOrigURL(
 		"_s1",                           // alias
 		th.redirectServer.URL+"/_long1", // oldLong
 		th.redirectServer.URL+"/_long2", // newLong
 		"strong-secret",                 // secret
 	)
 	// - Check that redirect urls are updated.
-	RedirectWorks(&th, "s1", "/long2")
-	RedirectWorks(&th, "_s1", "/_long2")
+	th.RedirectWorks("s1", "/long2")
+	th.RedirectWorks("_s1", "/_long2")
 
 	// Update alises; s1->s2, _s1->_s2.
-	UpdateAlias(&th, "s1", "s2", "strong-secret")
-	UpdateAlias(&th, "_s1", "_s2", "strong-secret")
+	th.UpdateAlias("s1", "s2", "strong-secret")
+	th.UpdateAlias("_s1", "_s2", "strong-secret")
 	// - Check redirects for _s2, s2
-	RedirectWorks(&th, "s2", "/long2")
-	RedirectWorks(&th, "_s2", "/_long2")
+	th.RedirectWorks("s2", "/long2")
+	th.RedirectWorks("_s2", "/_long2")
 	// - Check no redirects for _s1, s1
-	RedirectIs404(&th, "s1")
-	RedirectIs404(&th, "_s1")
+	th.RedirectIs404("s1")
+	th.RedirectIs404("_s1")
 
 	// Remove aliases for _s2, s2
-	RemoveAlias(&th, "s2", "strong-secret")
-	RemoveAlias(&th, "_s2", "strong-secret")
+	th.RemoveAlias("s2", "strong-secret")
+	th.RemoveAlias("_s2", "strong-secret")
 	// - Check no redirects for _s2, s2
-	RedirectIs404(&th, "_s2")
-	RedirectIs404(&th, "s2")
+	th.RedirectIs404("_s2")
+	th.RedirectIs404("s2")
 }
 
 func TestLookupsForPublicBookmarks(t *testing.T) {
@@ -309,24 +310,24 @@ func TestLookupsForPublicBookmarks(t *testing.T) {
 
 	// Add aliases for _s, s1, s2.
 	// _s is a private alias.
-	AddAlias(&th, "_s", th.redirectServer.URL+"/long", "strong-secret")
-	AddAlias(&th, "s1", th.redirectServer.URL+"/long", "strong-secret")
-	AddAlias(&th, "s2", th.redirectServer.URL+"/long", "strong-secret")
+	th.AddAlias("_s", th.redirectServer.URL+"/long", "strong-secret")
+	th.AddAlias("s1", th.redirectServer.URL+"/long", "strong-secret")
+	th.AddAlias("s2", th.redirectServer.URL+"/long", "strong-secret")
 	// Alias to long url should work for all the aliases. (even the private one)
-	Lookup(&th, "_s", th.redirectServer.URL+"/long")
-	Lookup(&th, "s1", th.redirectServer.URL+"/long")
-	Lookup(&th, "s2", th.redirectServer.URL+"/long")
+	th.Lookup("_s", th.redirectServer.URL+"/long")
+	th.Lookup("s1", th.redirectServer.URL+"/long")
+	th.Lookup("s2", th.redirectServer.URL+"/long")
 	// RevLookup with no secret => no private alises returned.
-	RevLookup(&th, th.redirectServer.URL+"/long",
+	th.RevLookup(th.redirectServer.URL+"/long",
 		[]interface{}{"s1", "s2"}, "")
 	// RevLookup with secret => private alises returned.
-	RevLookup(&th, th.redirectServer.URL+"/long",
+	th.RevLookup(th.redirectServer.URL+"/long",
 		[]interface{}{"s1", "s2", "_s"}, "strong-secret")
 	// RevLookup with random url => nothing returned.
-	RevLookup(&th, th.redirectServer.URL+"/does_not_exist",
+	th.RevLookup(th.redirectServer.URL+"/does_not_exist",
 		[]interface{}{}, "strong-secret")
 	// View bookmarks with correct secret => all aliases returned.
-	ViewBookmarks(&th,
+	th.ViewBookmarks(
 		[]AliasInfo{
 			{"_s", th.redirectServer.URL + "/long", "_s"},
 			{"s1", th.redirectServer.URL + "/long", "s1"},
@@ -334,7 +335,7 @@ func TestLookupsForPublicBookmarks(t *testing.T) {
 		},
 		"strong-secret")
 	// View bookmarks with wrong secret => only public aliases returned.
-	ViewBookmarks(&th,
+	th.ViewBookmarks(
 		[]AliasInfo{
 			{"s1", th.redirectServer.URL + "/long", "s1"},
 			{"s2", th.redirectServer.URL + "/long", "s2"},
@@ -346,33 +347,33 @@ func TestWrongPasswordFailsMutations(t *testing.T) {
 	defer th.cleanup()
 
 	// Setup: Add alias and check it works.
-	AddAlias(&th, "s1", th.redirectServer.URL+"/long1", "strong-secret")
-	RedirectWorks(&th, "s1", "/long1")
+	th.AddAlias("s1", th.redirectServer.URL+"/long1", "strong-secret")
+	th.RedirectWorks("s1", "/long1")
 
 	// Try to add alias request for s2 with wrong secret.
 	// Check that redirect fails for s2.
-	AddAlias(&th, "s2", th.redirectServer.URL+"/long1", "wrong-secret", FAILURE)
-	RedirectIs404(&th, "s2")
+	th.AddAlias("s2", th.redirectServer.URL+"/long1", "wrong-secret", FAILURE)
+	th.RedirectIs404("s2")
 
 	// Try to update long url for s1 with wrong secret.
 	// Verify the update was not applied by checking redirect.
-	UpdateOrigURL(&th,
+	th.UpdateOrigURL(
 		"s1",                           // alias
 		th.redirectServer.URL+"/long1", // oldLong
 		th.redirectServer.URL+"/long2", // newLong
 		"wrong-secret",                 // secret
 		FAILURE,
 	)
-	RedirectWorks(&th, "s1", "/long1")
+	th.RedirectWorks("s1", "/long1")
 
 	// Try to update alias for s1 to s2 with wrong secret.
 	// Verify the update was not applied by checking redirect.
-	UpdateAlias(&th, "s1", "s2", "wrong-secret", FAILURE)
-	RedirectWorks(&th, "s1", "/long1")
-	RedirectIs404(&th, "s2")
+	th.UpdateAlias("s1", "s2", "wrong-secret", FAILURE)
+	th.RedirectWorks("s1", "/long1")
+	th.RedirectIs404("s2")
 
 	// Try to remove alias with wrong secret.
 	// Verify the update was not applied by checking redirect.
-	RemoveAlias(&th, "s1", "wrong-secret", FAILURE)
-	RedirectWorks(&th, "s1", "/long1")
+	th.RemoveAlias("s1", "wrong-secret", FAILURE)
+	th.RedirectWorks("s1", "/long1")
 }
