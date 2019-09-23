@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"io/ioutil"
 	"math/rand"
 	"net/http"
@@ -200,9 +201,26 @@ func RemoveAlias(th *TestHelper, short, secret string, ok ...Outcome) {
 	} else {
 		res.Status(http.StatusOK).Text().NotEqual("ok")
 	}
-
 }
 
+func Lookup(th *TestHelper, short, long string, ok ...Outcome) {
+	th.require.LessOrEqual(len(ok), 1)
+	expectSuccess := len(ok) == 0 || ok[0]
+	res := th.httpexpect.POST("/actions/lookup").
+		WithFormField("short", short).Expect()
+	if expectSuccess {
+		res.Status(http.StatusOK).Body().Equal(long)
+	} else {
+		res.Status(http.StatusNotFound)
+	}
+}
+
+func RevLookup(th *TestHelper, long string, short []interface{}, secret string) {
+	th.httpexpect.POST("/actions/revlookup").
+		WithFormField("long", long).WithFormField("secret", secret).
+		Expect().Status(http.StatusOK).
+		JSON().Path("$.shorturls").Array().ContainsOnly(short...)
+}
 func RedirectIs404(th *TestHelper, short string) {
 	prev := len(*th.redirectReqs)
 	th.httpexpect.GET(short).Expect().StatusRange(httpexpect.Status4xx)
@@ -215,6 +233,21 @@ func RedirectWorks(th *TestHelper, short, urlPath string) {
 	th.require.Equal(prev+1, len(*th.redirectReqs))
 	apath := (*th.redirectReqs)[prev].URL.Path
 	th.require.Equal(urlPath, apath)
+}
+
+func ViewBookmarks(th *TestHelper, aliases []AliasInfo, secret string) {
+	expRespStruct := CreateViewResponse(aliases, testBookMarksServer)
+	actRespStr := th.httpexpect.POST("/actions/view").
+		WithFormField("secret", secret).Expect().
+		Status(http.StatusOK).Body().Raw()
+	actRespStruct := ViewResponse{}
+	th.require.Nil(json.Unmarshal([]byte(actRespStr), &actRespStruct))
+	// This is slightly fragile. This fails if the order of rows returned in
+	// the response does not match the order of `alises` array. Using insertion
+	// order seems to work.
+	// If this is getting problematic, sort the rows in the struct before
+	// comparing
+	th.require.Equal(expRespStruct, actRespStruct)
 }
 
 func TestMutationsAndRedirects(t *testing.T) {
@@ -271,12 +304,43 @@ func TestMutationsAndRedirects(t *testing.T) {
 }
 
 func TestLookupsForPublicBookmarks(t *testing.T) {
-	//TODO(dotslash): Add test.
-}
-func TestLookupsForPrivateBookmarks(t *testing.T) {
-	//TODO(dotslash): Add test.
-}
+	th := NewTestHelper(t)
+	defer th.cleanup()
 
+	// Add aliases for _s, s1, s2.
+	// _s is a private alias.
+	AddAlias(&th, "_s", th.redirectServer.URL+"/long", "strong-secret")
+	AddAlias(&th, "s1", th.redirectServer.URL+"/long", "strong-secret")
+	AddAlias(&th, "s2", th.redirectServer.URL+"/long", "strong-secret")
+	// Alias to long url should work for all the aliases. (even the private one)
+	Lookup(&th, "_s", th.redirectServer.URL+"/long")
+	Lookup(&th, "s1", th.redirectServer.URL+"/long")
+	Lookup(&th, "s2", th.redirectServer.URL+"/long")
+	// RevLookup with no secret => no private alises returned.
+	RevLookup(&th, th.redirectServer.URL+"/long",
+		[]interface{}{"s1", "s2"}, "")
+	// RevLookup with secret => private alises returned.
+	RevLookup(&th, th.redirectServer.URL+"/long",
+		[]interface{}{"s1", "s2", "_s"}, "strong-secret")
+	// RevLookup with random url => nothing returned.
+	RevLookup(&th, th.redirectServer.URL+"/does_not_exist",
+		[]interface{}{}, "strong-secret")
+	// View bookmarks with correct secret => all aliases returned.
+	ViewBookmarks(&th,
+		[]AliasInfo{
+			{"_s", th.redirectServer.URL + "/long", "_s"},
+			{"s1", th.redirectServer.URL + "/long", "s1"},
+			{"s2", th.redirectServer.URL + "/long", "s2"},
+		},
+		"strong-secret")
+	// View bookmarks with wrong secret => only public aliases returned.
+	ViewBookmarks(&th,
+		[]AliasInfo{
+			{"s1", th.redirectServer.URL + "/long", "s1"},
+			{"s2", th.redirectServer.URL + "/long", "s2"},
+		},
+		"wrong-secret")
+}
 func TestWrongPasswordFailsMutations(t *testing.T) {
 	th := NewTestHelper(t)
 	defer th.cleanup()
