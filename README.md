@@ -6,7 +6,7 @@ Bookmarks
 
 This is the code for [bm.suram.in](http://bm.suram.in). I use this to bookmark websites with custom redirect URLs. 
 
-The application is written in Go and uses [editable grid](https://github.com/webismymind/editablegrid) to list/search/update the bookmarked URLs. The app uses sqlite (the poor man's DB!) to persist data. It expects a `foo.db` in `bookmarks/bookmarks` directory. 
+The application is written in Go and uses [editable grid](https://github.com/webismymind/editablegrid) to list/search/update the bookmarked URLs. The app uses sqlite (the poor man's DB!) to persist data. It expects a `foo.db` in the repo root. 
 
 To get an empty sqlite file with the correct schema, use this online utility - [https://sqliteonline.com/#fiddle-5d6c0626e3699dmuk01a04iq](https://sqliteonline.com/#fiddle-5d6c0626e3699dmuk01a04iq)
 ```sql
