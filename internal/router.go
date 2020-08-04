@@ -1,4 +1,4 @@
-package main
+package internal
 
 import (
 	"net/http"
@@ -50,6 +50,6 @@ func NewRouter(serverAddress string, dbFile string) *mux.Router {
 			Name(route.Name).
 			Handler(handler)
 	}
-	router.PathPrefix("/").Handler(http.FileServer(http.Dir("./static")))
+	router.PathPrefix("/").Handler(http.FileServer(http.Dir("./internal/static")))
 	return router
 }

@@ -1,6 +1,6 @@
 #!/bin/bash
 #!/bin/sh
-sqlite3 src/foo.db <<EOF
+sqlite3 foo.db <<EOF
 CREATE TABLE "aliases" (
     orig TEXT,
     alias TEXT UNIQUE,
