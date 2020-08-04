@@ -1,4 +1,4 @@
-package main
+package internal
 
 import (
 	"encoding/json"
@@ -9,8 +9,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/gavv/httpexpect/v2"
 	"github.com/stretchr/testify/require"
-	"gopkg.in/gavv/httpexpect.v2"
 )
 
 // TODO(dotslash): Try out a more modern test framework, that displays test

@@ -7,6 +7,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/dotslash/bookmarks/internal"
 	"net/http"
 	"os"
 )
@@ -14,7 +15,7 @@ import (
 func main() {
 	fmt.Println("starting")
 	argsWithoutProg := os.Args[1:]
-	Log.Info("args", argsWithoutProg)
+	internal.Log.Info("args", argsWithoutProg)
 	// Get port and server address.
 	ServerAddress := argsWithoutProg[0]
 	port := argsWithoutProg[1]
@@ -25,6 +26,6 @@ func main() {
 	}
 	dbFile := pwd + "/foo.db"
 	// Launch server.
-	router := NewRouter(ServerAddress, dbFile)
-	Log.Warn(http.ListenAndServe(":"+port, router))
+	router := internal.NewRouter(ServerAddress, dbFile)
+	internal.Log.Warn(http.ListenAndServe(":"+port, router))
 }

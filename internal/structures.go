@@ -1,4 +1,4 @@
-package main
+package internal
 
 import "strings"
 
@@ -14,8 +14,7 @@ func (a *AliasInfo) toRow(prefix string) Row {
 	return Row{ID: a.Alias, Values: info}
 }
 
-// ColInfo holds metadata for columns in the alias table
-// showed in the UI.
+// ColInfo holds metadata for columns in the alias table showed in the UI.
 type ColInfo struct {
 	Name     string  `json:"name"`
 	Label    string  `json:"label"`
@@ -25,8 +24,7 @@ type ColInfo struct {
 	Values   *string `json:"values"`
 }
 
-// RowInfo contains information for a singe alias row
-// in the alias table.
+// RowInfo contains information for a singe alias row in the alias table.
 type RowInfo struct {
 	Fullurl  string `json:"fullurl"`
 	Alias    string `json:"alias"`
@@ -71,8 +69,7 @@ func CreateViewResponse(aliases []AliasInfo, serverPrefix string) ViewResponse {
 	return ViewResponse{Data: rows, Metadata: metadata}
 }
 
-// ErrStruct holds an error message that can be
-// converted to a json.
+// ErrStruct holds an error message that can be converted to a json.
 type ErrStruct struct {
 	Code int    `json:"code"`
 	Text string `json:"text"`

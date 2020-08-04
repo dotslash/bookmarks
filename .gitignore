@@ -1,6 +1,9 @@
-.settings/*
-.buildpath
-.project
-*.db
-*.bin
+db
+*.egg-info
+*.pyc
+build
+dist
+*.iml
 .idea
+foo.db
+bookmarks

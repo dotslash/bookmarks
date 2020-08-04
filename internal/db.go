@@ -1,4 +1,4 @@
-package main
+package internal
 
 import (
 	"database/sql"
@@ -8,6 +8,8 @@ import (
 
 	_ "github.com/mattn/go-sqlite3"
 )
+
+// TODO/NOTE: Errors are not handled for most sqlite statements.
 
 func getDbCxn(dbpath string) (*sql.DB, error) {
 	Log.Printf("dbpath %v", dbpath)
