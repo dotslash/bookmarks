@@ -9,6 +9,8 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
+// TODO/NOTE: Errors are not handled for most sqlite statements.
+
 func getDbCxn(dbpath string) (*sql.DB, error) {
 	Log.Printf("dbpath %v", dbpath)
 	db, err := sql.Open("sqlite3", dbpath)

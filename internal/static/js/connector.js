@@ -12,7 +12,7 @@ function highlightRow(rowId, bgColor, after) {
 }
 
 function highlight(div_id, style) {
-    highlightRow(div_id, style == "error" ? "#e5afaf" : style == "warning" ? "#ffcc00" : "#8dc70a");
+    highlightRow(div_id, style === "error" ? "#e5afaf" : style === "warning" ? "#ffcc00" : "#8dc70a");
 }
 
 /**
@@ -30,7 +30,7 @@ function updateCellValue(editableGrid, rowIndex, columnIndex, oldValue, newValue
         data: {
             tablename: editableGrid.name,
             id: editableGrid.getRowId(rowIndex),
-            newvalue: editableGrid.getColumnType(columnIndex) == "boolean" ? (newValue ? 1 : 0) : newValue,
+            newvalue: editableGrid.getColumnType(columnIndex) === "boolean" ? (newValue ? 1 : 0) : newValue,
             oldvalue: oldValue,
             colname: editableGrid.getColumnName(columnIndex),
             coltype: editableGrid.getColumnType(columnIndex),
@@ -38,7 +38,7 @@ function updateCellValue(editableGrid, rowIndex, columnIndex, oldValue, newValue
         },
         success: function(response) {
             // reset old value if failed then highlight row
-            var success = onResponse ? onResponse(response) : (response == "ok" || !isNaN(parseInt(response))); // by default, a sucessfull reponse can be "ok" or a database id
+            var success = onResponse ? onResponse(response) : (response === "ok" || !isNaN(parseInt(response))); // by default, a sucessfull reponse can be "ok" or a database id
             if (!success) editableGrid.setValueAt(rowIndex, columnIndex, oldValue);
             highlight(row.id, success ? "ok" : "error");
         },
@@ -72,8 +72,6 @@ function DatabaseGrid() {
 }
 
 DatabaseGrid.prototype.fetchGrid = function() {
-    // call a PHP script to get the data
-    //this.editableGrid.loadJSON("loaddata.php");
     this.editableGrid.loadJSON("actions/view");
 };
 
@@ -85,7 +83,7 @@ DatabaseGrid.prototype.initializeGrid = function(grid) {
     grid.setCellRenderer("action", new CellRenderer({
         render: function(cell, _id) {
             var rowId = grid.getRowId(cell.rowIndex).trim();
-            console.log(rowId)
+            console.log(rowId);
             cell.innerHTML += "<i onclick=\"datagrid.deleteRow('" + rowId + "');\" class='fa fa-trash-o' ></i>";
         }
     }));
@@ -111,7 +109,7 @@ DatabaseGrid.prototype.deleteRow = function(id) {
                 secret : $('#secret').val()
             },
             success: function(response) {
-                if (response == "ok")
+                if (response === "ok")
                     self.editableGrid.removeRow(id);
             },
             error: function(XMLHttpRequest, textStatus, exception) {
@@ -141,7 +139,7 @@ DatabaseGrid.prototype.addRow = function(id) {
             secret : $('#secret').val()
         },
         success: function(response) {
-            if (response == "ok") {
+            if (response === "ok") {
 
                 // hide form
                 showAddForm();
@@ -178,7 +176,7 @@ DatabaseGrid.prototype.refresh = function() {
         },
         async: true
     });
-}
+};
 
 function updatePaginator(grid, divId) {
     divId = divId || "paginator";
@@ -243,7 +241,7 @@ function updatePaginator(grid, divId) {
         grid.lastPage();
     });
     paginator.append(link);
-};
+}
 
 
 function showAddForm() {

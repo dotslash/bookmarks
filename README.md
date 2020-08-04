@@ -10,9 +10,9 @@ The application is written in Go and uses [editable grid](https://github.com/web
 To get an empty sqlite file with the correct schema, use this online utility - [https://sqliteonline.com/#fiddle-5d6c0626e3699dmuk01a04iq](https://sqliteonline.com/#fiddle-5d6c0626e3699dmuk01a04iq)
 ```sql
 CREATE TABLE "aliases" (
-    `orig` TEXT,
-    `alias`TEXT UNIQUE,
-    `rec_id`       INTEGER PRIMARY KEY AUTOINCREMENT
+    `orig`   TEXT,
+    `alias`  TEXT UNIQUE,
+    `rec_id` INTEGER PRIMARY KEY AUTOINCREMENT
 );
 CREATE INDEX aliases_orig_index ON "aliases" (orig);
 
@@ -29,20 +29,14 @@ The application has 2 "admin" features. To enable these features there needs to 
 2. Any bookmark with alias that starts with `_` will be hidden unless the secret is passed in the request.
 
 ## Installation
-Do the following from `bookmarks/bookmarks` directory to start the server.
+Clone the repository to $GOPATH/src/github.com/dotslash/bookmarks and the following to start the server.
 ```sh
-go build -o bookmarks.bin *.go
-./bookmarks.bin http://localhost:8085 8085
-```
-
-Alternatively run `go install` command from `bookmarks/bookmarks` directory.
-```sh
-go install
-$GOPATH/bin/bookmarks http://localhost:8085 8085
+go build
+./bookmarks http://localhost:8085 8085
 ```
 The logs will go to `~/log/bm-info.log`, `~/log/bm-error.log`
 
-Check `supervisor_aws.conf` to see how I install the server.
+Check `scripts/supervisor_aws.conf` to see how I install the server.
 
 Chrome Extension
 ================
