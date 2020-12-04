@@ -3,6 +3,7 @@
 // arg1 : Address of the server hosting the application. This will be used
 //        to generate short urls. E.g - https://bm.suram.in/r/foo
 // arg2 : port to run the http server at.
+// arg3 : db location
 package main
 
 import (
@@ -19,12 +20,7 @@ func main() {
 	// Get port and server address.
 	ServerAddress := argsWithoutProg[0]
 	port := argsWithoutProg[1]
-	// Get dbFile path.
-	pwd, err := os.Getwd()
-	if err != nil {
-		panic(fmt.Errorf("os.Getwd failed. %v", err))
-	}
-	dbFile := pwd + "/foo.db"
+	dbFile := argsWithoutProg[2]
 	// Launch server.
 	router := internal.NewRouter(ServerAddress, dbFile)
 	internal.Log.Warn(http.ListenAndServe(":"+port, router))

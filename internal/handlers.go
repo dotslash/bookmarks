@@ -3,18 +3,15 @@ package internal
 import (
 	"encoding/json"
 	"fmt"
-	"net/http"
-	"strings"
-	"sync"
-
 	"github.com/gorilla/mux"
 	"github.com/vincent-petithory/dataurl"
+	"net/http"
+	"strings"
 )
 
 // Handlers struct has methods to handle http requests to be served by
 // the webserver.
 type Handlers struct {
-	once    sync.Once
 	storage *StorageInterface
 	// Address of the server hosting the application. This will be used
 	// to generate short urls. E.g - https://bm.suram.in/r/foo
@@ -23,19 +20,13 @@ type Handlers struct {
 	dbFile string
 }
 
-func (h *Handlers) getStorage() *StorageInterface {
-	h.once.Do(func() {
-		h.storage = NewStorageInterface(h.dbFile)
-	})
-	return h.storage
-}
 
 // ActionView handles http request to view bookmarks list.
 func (h *Handlers) ActionView(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.WriteHeader(http.StatusOK)
 	secret := r.FormValue("secret")
-	aliasInfos := h.getStorage().GetAllAliases(secret)
+	aliasInfos := h.storage.GetAllAliases(secret)
 	resp := CreateViewResponse(aliasInfos, h.serverAddress)
 	if err := json.NewEncoder(w).Encode(resp); err != nil {
 		Log.Fatal(err)
@@ -47,7 +38,7 @@ func (h *Handlers) ActionLookup(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.WriteHeader(http.StatusOK)
 	short := r.FormValue("short")
-	fullURL := h.getStorage().URLFromAlias(short)
+	fullURL := h.storage.URLFromAlias(short)
 	if fullURL == nil {
 		w.WriteHeader(http.StatusNotFound)
 		fmt.Fprint(w, "Not Found")
@@ -62,7 +53,7 @@ func (h *Handlers) ActionRevLookup(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	secret := r.FormValue("secret")
 	long := r.FormValue("long")
-	shortUrls := h.getStorage().GetShortUrls(secret, long)
+	shortUrls := h.storage.GetShortUrls(secret, long)
 	resp := RevLookupResponse{shortUrls}
 	if err := json.NewEncoder(w).Encode(resp); err != nil {
 		Log.Fatal(err)
@@ -75,7 +66,7 @@ func (h *Handlers) ActionAdd(w http.ResponseWriter, r *http.Request) {
 	long := r.FormValue("url")
 	secret := r.FormValue("secret")
 	Log.Println(short, long, secret)
-	respStr := h.getStorage().AddAlias(long, short, secret)
+	respStr := h.storage.AddAlias(long, short, secret)
 	fmt.Fprint(w, respStr)
 }
 
@@ -84,7 +75,7 @@ func (h *Handlers) ActionDel(w http.ResponseWriter, r *http.Request) {
 	short := r.FormValue("id")
 	secret := r.FormValue("secret")
 	Log.Println("formparams", short, secret)
-	respStr := h.getStorage().DelAlias(short, secret)
+	respStr := h.storage.DelAlias(short, secret)
 	fmt.Fprint(w, respStr)
 }
 
@@ -96,12 +87,11 @@ func (h *Handlers) ActionUpdate(w http.ResponseWriter, r *http.Request) {
 	colName := r.FormValue("colname")
 	secret := r.FormValue("secret")
 	Log.Println("formparams:(presAlias, new, old, field)", presAlias, newVal, oldVal, colName)
-	respStr := h.getStorage().UpdateAlias(presAlias, oldVal, newVal, colName, secret)
+	respStr := h.storage.UpdateAlias(presAlias, oldVal, newVal, colName, secret)
 	fmt.Fprint(w, respStr)
 }
 
-
-func (h *Handlers) writeError(w http.ResponseWriter, status int, text string ) {
+func (h *Handlers) writeError(w http.ResponseWriter, status int, text string) {
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.WriteHeader(status)
 	err := json.NewEncoder(w).Encode(ErrStruct{Code: status, Text: text})
@@ -120,12 +110,11 @@ func (h *Handlers) handleDataUrl(w http.ResponseWriter, urlStr string) {
 	w.Write(parsed.Data)
 }
 
-
 // Redirect handles redirect for short url to full url.
 func (h *Handlers) Redirect(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	redID := vars["redId"]
-	url := h.getStorage().URLFromAlias(redID)
+	url := h.storage.URLFromAlias(redID)
 	if url != nil {
 		var urlStr = *url
 		if strings.HasPrefix(urlStr, "data:") {

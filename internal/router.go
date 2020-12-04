@@ -23,7 +23,7 @@ type routeStruct struct {
 func getRoutes(serverAddress string, dbFile string) []routeStruct {
 	getOnly := []string{"GET"}
 	getAndPost := []string{"GET", "POST"}
-	handlers := &Handlers{serverAddress: serverAddress, dbFile: dbFile}
+	handlers := &Handlers{serverAddress: serverAddress, dbFile: dbFile, storage: NewStorageInterface(dbFile)}
 	return []routeStruct{
 		{"ActionAdd", getAndPost, "/actions/add", handlers.ActionAdd},
 		{"ActionDel", getAndPost, "/actions/delete", handlers.ActionDel},
