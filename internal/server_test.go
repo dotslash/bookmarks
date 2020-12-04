@@ -342,6 +342,7 @@ func TestLookupsForPublicBookmarks(t *testing.T) {
 		},
 		"wrong-secret")
 }
+
 func TestWrongPasswordFailsMutations(t *testing.T) {
 	th := NewTestHelper(t)
 	defer th.cleanup()
@@ -376,4 +377,23 @@ func TestWrongPasswordFailsMutations(t *testing.T) {
 	// Verify the update was not applied by checking redirect.
 	th.RemoveAlias("s1", "wrong-secret", FAILURE)
 	th.RedirectWorks("s1", "/long1")
+}
+
+func TestDataUrl(t *testing.T) {
+	th := NewTestHelper(t)
+	defer th.cleanup()
+
+	// Add and verify data alias. content type = plain text
+	th.AddAlias("stext", "data:text/plain;base64,SGVsbG8=", "strong-secret")
+	th.httpexpect.GET("/r/stext").Expect().
+		Status(http.StatusOK).
+		ContentType("text/plain").
+		Body().Equal("Hello")
+
+	// Add and verify data alias. content type = html
+	th.AddAlias("shtml", "data:text/html;base64,SGVsbG8=", "strong-secret")
+	th.httpexpect.GET("/r/shtml").Expect().
+		Status(http.StatusOK).
+		ContentType("text/html").
+		Body().Equal("Hello")
 }
