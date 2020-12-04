@@ -3,7 +3,7 @@
 // arg1 : Address of the server hosting the application. This will be used
 //        to generate short urls. E.g - https://bm.suram.in/r/foo
 // arg2 : port to run the http server at.
-// arg2 : db location
+// arg3 : db location
 package main
 
 import (
