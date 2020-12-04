@@ -8,6 +8,7 @@ import (
 	"sync"
 
 	"github.com/gorilla/mux"
+	"github.com/vincent-petithory/dataurl"
 )
 
 // Handlers struct has methods to handle http requests to be served by
@@ -99,6 +100,27 @@ func (h *Handlers) ActionUpdate(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, respStr)
 }
 
+
+func (h *Handlers) writeError(w http.ResponseWriter, status int, text string ) {
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	w.WriteHeader(status)
+	err := json.NewEncoder(w).Encode(ErrStruct{Code: status, Text: text})
+	if err != nil {
+		panic(err)
+	}
+}
+
+func (h *Handlers) handleDataUrl(w http.ResponseWriter, urlStr string) {
+	parsed, err := dataurl.DecodeString(urlStr)
+	if err != nil {
+		h.writeError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+	w.Header().Add("Content-Type", parsed.MediaType.ContentType())
+	w.Write(parsed.Data)
+}
+
+
 // Redirect handles redirect for short url to full url.
 func (h *Handlers) Redirect(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
@@ -106,19 +128,16 @@ func (h *Handlers) Redirect(w http.ResponseWriter, r *http.Request) {
 	url := h.getStorage().URLFromAlias(redID)
 	if url != nil {
 		var urlStr = *url
+		if strings.HasPrefix(urlStr, "data:") {
+			h.handleDataUrl(w, urlStr)
+			return
+		}
 		if !strings.HasPrefix(urlStr, "http://") && !strings.HasPrefix(urlStr, "https://") {
 			urlStr = "http://" + urlStr
 		}
 		http.Redirect(w, r, urlStr, http.StatusFound)
 		return
 	}
-
 	// If we didn't find it, 404
-	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-	w.WriteHeader(http.StatusNotFound)
-	err := json.NewEncoder(w).Encode(
-		ErrStruct{Code: http.StatusNotFound, Text: "Not Found"})
-	if err != nil {
-		panic(err)
-	}
+	h.writeError(w, http.StatusNotFound, "Not Found")
 }

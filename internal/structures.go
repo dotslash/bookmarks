@@ -61,7 +61,7 @@ func CreateViewResponse(aliases []AliasInfo, serverPrefix string) ViewResponse {
 	}
 	// log.Println(rows)
 	metadata := []ColInfo{
-		{Name: "fullurl", Label: "Full Url", Datatype: "url", Bar: false, Editable: true},
+		{Name: "fullurl", Label: "Full Url", Datatype: "string", Bar: false, Editable: true},
 		{Name: "alias", Label: "Alias", Datatype: "string", Bar: false, Editable: true},
 		{Name: "shorturl", Label: "Short Url", Datatype: "url", Bar: false, Editable: false},
 		{Name: "action", Label: "Actions", Datatype: "html", Bar: true, Editable: false},

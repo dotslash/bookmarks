@@ -42,6 +42,6 @@ func newLogger() *logrus.Logger {
 			logrus.ErrorLevel: home + "/log/bm-error.log",
 		},
 		&logrus.TextFormatter{}))
-	lLog.Info("got logger in", time.Since(start))
+	lLog.Info("got logger in ", time.Since(start))
 	return lLog
 }
