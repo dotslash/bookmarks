@@ -14,7 +14,7 @@ import (
 )
 
 // TODO(dotslash): Try out a more modern test framework, that displays test
-// exection summaries better. As of now og output looks like this -
+// execution summaries better. As of now og output looks like this -
 // https://gist.github.com/dotslash/56bed5506ff96c2f7740c54c451d5986
 
 type Outcome bool
@@ -377,6 +377,53 @@ func TestWrongPasswordFailsMutations(t *testing.T) {
 	// Verify the update was not applied by checking redirect.
 	th.RemoveAlias("s1", "wrong-secret", FAILURE)
 	th.RedirectWorks("s1", "/long1")
+}
+
+func TestTemplates(t *testing.T) {
+	th := NewTestHelper(t)
+	defer th.cleanup()
+
+	// Add normal alias and test it works
+	th.AddAlias("s1", th.redirectServer.URL+"/long1", "strong-secret")
+	th.RedirectWorks("s1", "/long1")
+
+	// Add templated alias and check it works.
+	publicTemplateAlias := `template:ok-(\d+)-(.*)`
+	longUrl := th.redirectServer.URL + "/long1-$1-$2-$1"
+	th.AddAlias(publicTemplateAlias, longUrl, "strong-secret")
+	th.RedirectWorks("ok-1234-abcd", "/long1-1234-abcd-1234")
+	th.RedirectIs404("ok-12x4-abcd")
+
+	// Add secret templated alias and check it works.
+	privateTemplateALias := `_template:ok1-(\d+)-(.*)`
+	th.AddAlias(privateTemplateALias, longUrl, "strong-secret")
+	th.RedirectWorks("ok1-1234-abcd", "/long1-1234-abcd-1234")
+	th.RedirectIs404("ok1-12x4-abcd")
+
+	// Verify that the normal alias still works
+	th.RedirectWorks("s1", "/long1")
+
+	// View bookmarks with wrong secret => only public aliases returned.
+	th.ViewBookmarks(
+		[]AliasInfo{
+			{"s1", th.redirectServer.URL+"/long1", "s1"},
+			{publicTemplateAlias, longUrl, "s2"},
+		},
+		"wrong-secret")
+	// View bookmarks with wrong secret => only public aliases returned.
+	th.ViewBookmarks(
+		[]AliasInfo{
+			{"s1", th.redirectServer.URL+"/long1", "s1"},
+			{publicTemplateAlias, longUrl, "s2"},
+			{privateTemplateALias, longUrl, "s3"},
+		},
+		"strong-secret")
+
+
+	th.RevLookup(longUrl, []interface{}{publicTemplateAlias}, "")
+	// RevLookup with secret => private aliases returned.
+	th.RevLookup(longUrl, []interface{}{publicTemplateAlias, privateTemplateALias}, "strong-secret")
+
 }
 
 func TestDataUrl(t *testing.T) {

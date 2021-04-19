@@ -3,17 +3,36 @@ package internal
 import (
 	"database/sql"
 	"fmt"
+	"github.com/mattn/go-sqlite3"
+	"io"
+	"regexp"
 	"strconv"
 	"strings"
+	"sync"
 
 	_ "github.com/mattn/go-sqlite3"
 )
 
 // TODO/NOTE: Errors are not handled for most sqlite statements.
 
+var registerSqliteExtended sync.Once
+
 func getDbCxn(dbpath string) (*sql.DB, error) {
 	Log.Printf("dbpath %v", dbpath)
-	db, err := sql.Open("sqlite3", dbpath)
+
+	registerSqliteExtended.Do(func() {
+		regex_match := func(re, s string) (bool, error) {
+			return regexp.MatchString("^"+re+"$", s)
+		}
+		sql.Register("sqlite3_extended",
+			&sqlite3.SQLiteDriver{
+				ConnectHook: func(conn *sqlite3.SQLiteConn) error {
+					return conn.RegisterFunc("regex_match", regex_match, true)
+				},
+			})
+	})
+
+	db, err := sql.Open("sqlite3_extended", dbpath)
 	if err != nil {
 		Log.Fatal(err)
 		return nil, err
@@ -61,6 +80,25 @@ func NewStorageInterface(dbFile string) *StorageInterface {
 	return &StorageInterface{db: db, secret: getSecret(db)}
 }
 
+func safeClose(c io.Closer, ctx string) {
+	err := c.Close()
+	if err != nil {
+		Log.Println(ctx, err)
+	}
+}
+
+func panicOnErr(err error) {
+	if err != nil {
+		Log.Fatal(err)
+	}
+}
+
+func panicIf(b bool) {
+	if b {
+		Log.Fatal("panicIf(false)")
+	}
+}
+
 // URLFromAlias returns the full url for the given `alias`.
 func (s *StorageInterface) URLFromAlias(alias string) *string {
 	stmt, err := s.db.Prepare("select orig from aliases where alias = ?")
@@ -75,13 +113,43 @@ func (s *StorageInterface) URLFromAlias(alias string) *string {
 	}
 	defer rows.Close()
 
-	for rows.Next() {
+	if rows.Next() {
 		var orig string
 		rows.Scan(&orig)
 		Log.Println(orig)
 		return &orig
+	} else if ret := s.URLFromAliasTemplate("template:" + alias); ret != nil {
+		return ret
+	} else {
+		return s.URLFromAliasTemplate("_template:" + alias)
 	}
-	return nil
+}
+
+func (s *StorageInterface) URLFromAliasTemplate(expandedTemplate string) *string {
+	panicIf(!strings.HasPrefix(expandedTemplate, "template:") && !strings.HasPrefix(expandedTemplate, "_template:"))
+	funcStr := "URLFromAliasTemplate(" + expandedTemplate + ")"
+
+	stmt, err := s.db.Prepare("select alias, orig from aliases where regex_match(alias, ?)")
+	defer safeClose(stmt, funcStr + ".stmt")
+	panicOnErr(err)
+
+	rows, err := stmt.Query(expandedTemplate)
+	defer safeClose(rows, funcStr + ".rows")
+	panicOnErr(err)
+
+	if !rows.Next() {
+		return nil
+	}
+	var longUrl, templateReStr string
+
+	panicOnErr(rows.Scan(&templateReStr, &longUrl))
+	Log.Println(templateReStr, longUrl)
+
+	templateRe, err := regexp.Compile(templateReStr)
+	panicOnErr(err)
+
+	ret := templateRe.ReplaceAllString(expandedTemplate, longUrl)
+	return &ret
 }
 
 // GetShortUrls gets the short urls for the given full url. If secret matches
