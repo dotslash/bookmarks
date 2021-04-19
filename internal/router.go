@@ -31,7 +31,7 @@ func getRoutes(serverAddress string, dbFile string) []routeStruct {
 		{"ActionRevLookup", getAndPost, "/actions/revlookup", handlers.ActionRevLookup},
 		{"ActionUpdate", getAndPost, "/actions/update", handlers.ActionUpdate},
 		{"ActionView", getAndPost, "/actions/view", handlers.ActionView},
-		{"Redirect", getOnly, "/r/{redId}", handlers.Redirect},
+		{"Redirect", getOnly, "/r/{redId:.*}", handlers.Redirect},
 	}
 }
 
