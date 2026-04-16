@@ -1,9 +1,35 @@
-db
+# Binaries
+bookmarks
+bookmarks_run_binary
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Database files
+*.db
+
+# IDE / Editor
+.idea/
+*.iml
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Go
+vendor/
+
+# Logs
+*.log
+
+# Legacy (Python)
 *.egg-info
 *.pyc
-build
-dist
-*.iml
-.idea
-foo.db
-bookmarks
+build/
+dist/
