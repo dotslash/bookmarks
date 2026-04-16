@@ -1,14 +1,46 @@
-[![Build Status](https://travis-ci.com/dotslash/bookmarks.svg?branch=master)](https://travis-ci.com/dotslash/bookmarks)
-[![codecov](https://codecov.io/gh/dotslash/bookmarks/branch/master/graph/badge.svg)](https://codecov.io/gh/dotslash/bookmarks)
-
 # Bookmarks
 
-This is the code for [bm.suram.in](http://bm.suram.in). I use this to bookmark websites with custom redirect URLs. 
+A self-hosted bookmark manager with short URL redirects. Save websites with custom aliases and access them via short URLs like `https://bm.suram.in/r/gh`.
 
-The application is written in Go and uses [editable grid](https://github.com/webismymind/editablegrid) to 
-list/search/update the bookmarked URLs. The app uses sqlite (the poor man's DB!) to persist data.
+Built with Go and SQLite. See it live at [bm.suram.in](http://bm.suram.in).
 
-Use `internal/testdata/test_db` to get an empty sqlite file with the correct schema. Schema is as follows.
+## Features
+
+- **Short URL redirects** — bookmark any URL with a custom alias
+- **Inline editing** — click any cell to edit directly in the table
+- **Search & filter** — live search across all bookmarks
+- **Admin controls** — secret-based auth for adding, editing, and deleting
+- **Hidden aliases** — aliases starting with `_` are hidden unless authenticated
+- **Template aliases** — regex-based alias patterns for dynamic redirects
+- **Chrome extension** — quickly add bookmarks from the browser ([readme](chrome_plugin/))
+
+## Quick Start
+
+### Prerequisites
+
+- [Go](https://go.dev/doc/install) (or use [GVM](https://github.com/moovweb/gvm) to manage versions)
+- GCC (required for `go-sqlite3` CGO bindings)
+- Make
+
+### Setup & Run
+
+```sh
+make setup   # creates dev.db from the test schema
+make build   # fetches deps and compiles the binary
+make run     # runs setup + build, then starts the server
+```
+
+The server starts at **http://localhost:8085**.
+
+### Other Commands
+
+```sh
+make test    # run tests
+make clean   # remove binary and dev.db
+```
+
+## Database Schema
+
 ```sql
 CREATE TABLE "aliases" (
     `orig`   TEXT,
@@ -18,29 +50,50 @@ CREATE TABLE "aliases" (
 CREATE INDEX aliases_orig_index ON "aliases" (orig);
 
 CREATE TABLE `config` (
-	`key`	TEXT,
-	`value`	TEXT,
-	PRIMARY KEY(key)
-)
+    `key`   TEXT,
+    `value` TEXT,
+    PRIMARY KEY(key)
+);
+```
+
+Use `internal/testdata/test_db` for an empty sqlite file with this schema, or run `scripts/setup_db.sh <path>` if you have `sqlite3` installed.
+
+## Admin Features
+
+To enable admin features, insert a secret into the `config` table:
+
+```sql
+INSERT INTO config ("key", "value") VALUES ("bm_secret", "YOUR_SECRET_KEY");
+```
+
+Once set:
+1. Modifications (add/edit/delete) require the secret in the request.
+2. Aliases starting with `_` are hidden unless the secret is provided.
+
+## Project Structure
 
 ```
-## Admin features
-The application has 2 "admin" features. To enable these features there needs to be a record with key set to `bm_secret`
-and value set to `{YOUR_SECRET_KEY}` in the `config` table. 
-1. After this, content can be modified only if the correct secret is passed in the request.
-2. Any bookmark with alias that starts with `_` will be hidden unless the secret is passed in the request.
-
-## Installation
-Clone the repository to $GOPATH/src/github.com/dotslash/bookmarks and the following to start the server.
-```sh
-go build
-./bookmarks http://localhost:8085 8085 foo.db
+├── main.go                  # entry point
+├── internal/
+│   ├── db.go                # sqlite storage layer
+│   ├── handlers.go          # HTTP request handlers
+│   ├── router.go            # route definitions
+│   ├── structures.go        # data types and response builders
+│   ├── logger.go            # logging setup
+│   ├── server_test.go       # integration tests
+│   └── static/              # frontend assets (served at /)
+│       ├── index.html
+│       ├── css/style.css
+│       └── js/app.js
+├── scripts/
+│   ├── setup_db.sh          # create a new db with schema
+│   └── supervisor_aws.conf  # example supervisor config
+├── chrome_plugin/            # chrome extension source
+├── Makefile                  # dev workflow commands
+├── DEV_SETUP.md             # detailed developer setup guide
+└── ISSUES.md                # tracked issues and feature requests
 ```
-The logs will go to `~/log/bm-info.log`, `~/log/bm-error.log`
 
-Check `scripts/supervisor_aws.conf` to see how I install the server.
+## License
 
-## Chrome Extension
-The application also comes with a compatible chrome extension. Check out its 
-[Readme](https://github.com/dotslash/bookmarks/tree/master/chrome_plugin) 
-
+See [LICENCE](LICENCE).
