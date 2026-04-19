@@ -2,6 +2,7 @@ package internal
 
 import (
 	"net/http"
+	"strings"
 
 	"github.com/gorilla/mux"
 )
@@ -50,6 +51,20 @@ func NewRouter(serverAddress string, dbFile string) *mux.Router {
 			Name(route.Name).
 			Handler(handler)
 	}
-	router.PathPrefix("/").Handler(http.FileServer(http.Dir("./internal/static")))
+	isDev := strings.HasPrefix(serverAddress, "http://localhost") || strings.HasPrefix(serverAddress, "http://127.0.0.1")
+	router.PathPrefix("/").Handler(CacheMiddleware(http.FileServer(http.Dir("./internal/static")), isDev))
 	return router
+}
+
+// CacheMiddleware sets Cache-Control headers for static assets based on environment.
+func CacheMiddleware(h http.Handler, isDev bool) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if isDev {
+			w.Header().Set("Cache-Control", "no-cache, no-store, must-revalidate")
+		} else {
+			// Cache for 30 days in prod
+			w.Header().Set("Cache-Control", "public, max-age=2592000")
+		}
+		h.ServeHTTP(w, r)
+	})
 }
