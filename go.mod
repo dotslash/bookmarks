@@ -7,7 +7,7 @@ require (
 	github.com/gorilla/mux v1.7.4
 	github.com/mattn/go-sqlite3 v1.14.0
 	github.com/rifflock/lfshook v0.0.0-20180920164130-b9218ef580f5
-	github.com/sirupsen/logrus v1.6.0
-	github.com/stretchr/testify v1.6.1
+	github.com/sirupsen/logrus v1.8.3
+	github.com/stretchr/testify v1.7.0
 	github.com/vincent-petithory/dataurl v0.0.0-20191104211930-d1553a71de50
 )
